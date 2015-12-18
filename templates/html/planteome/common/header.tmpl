@@ -15,13 +15,13 @@
         <span class="icon-bar"></span>
       </button>
       <a class="amigo-logo-img-link" href="/"><img class="amigo-logo-img" src="[% image_dir %]/Planteome-logo.png" alt="Planteome logo" title="Planteome front page"></a>
-      <a class="navbar-brand" href="[% base %]/amigo/landing">AmiGO 2</a>
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 
 	<!-- Home. -->
-        <li[% IF page_name == 'landing' %] class="active"[% END %]><a href="[% interlink_landing %]" title="The AmiGO 2 landing page.">Home</a></li>
+        <!--<li[% IF page_name == 'landing' %] class="active"[% END %]><a href="[% interlink_landing %]" title="The Planteome landing page.">Home</a></li> -->
+        <li[% IF page_name == 'landing' %] class="active"[% END %]><a href="/" title="The Planteome home page.">Home</a></li>
 
 	<!-- The various searches. -->
         <li class="dropdown">
@@ -53,19 +53,12 @@
 
 	<!-- Feedback. -->
 	[% # IF BETA == 1 %]
-	<li><a href="http://wiki.geneontology.org/index.php/AmiGO_2:_Feedback" title="Give feedback on AmiGO 2">Feedback</a></li>    
+	<li><a href="http://planteome.org/contact" title="Give feedback on Planteome">Feedback</a></li>    
 	[% # END %]
 
 	<!-- About. -->
-	<li><a href="http://wiki.geneontology.org/index.php/AmiGO_2" title="About AmiGO 2">About</a></li>
+	<li><a href="http://planteome.org/about" title="About Planteome">About</a></li>
 
-	<!-- NOTE: Temporary; old AmiGO backlink. -->
-	<li>
-	  <!-- <span class="label label-default"> -->
-	    <a href="[% public_1x_base %]/go.cgi"
-	       title="Use legacy AmiGO 1.8">AmiGO 1.8</a>
-	  <!-- </span> -->
-	</li>
 
       </ul>
 
