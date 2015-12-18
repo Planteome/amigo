@@ -1,10 +1,88 @@
 div {
 color: '#4e5679';
 }
+/* Logo size */
 .amigo-logo-img {
-    height: 50px;
+    height: 40px;
 }
+/* Top navbar active */
+.navbar-default .navbar-nav>.active>a {
+  background-color: #eeb05a;
+}
+/* Top navbar text */
+.navbar-default .navbar-nav>li>a {
+  color: #333;
+  font-size: large;
+}
+/* Top navbar */
 .navbar-default {
-  background-color: #f8f8f8;
+  background-color: #eeb05a;
   border-color: #e7e7e7;
 }
+/* Alert bar, should only be on dev site */
+.alert-info {
+  color: #31708f;
+  background-color: #eeb05a;
+  border-color: #bce8f1;
+}
+/* Information bar */
+.panel-default>.panel-heading {
+  color: #333;
+  background-color: #f7d3a2;
+  border-color: #ddd;
+}
+/* filter selection */
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+ border: 1px solid #3875d7;
+ background: #f7d3a2 url(images/ui-bg_flat_85_d3dff5_40x100.png) 50% 50% repeat-x;
+ font-weight: bold;
+ color: #2e6e9e;
+}
+/* Search result odd rows */
+.odd_row {
+ background-color: #fceed4;
+ background-image: initial;
+ background-position-x: initial;
+ background-position-y: initial;
+ background-size: initial;
+ background-repeat-x: initial;
+ background-repeat-y: initial;
+ background-attachment: initial;
+ background-origin: initial;
+ background-clip: initial;
+/* background-color: rgb(253, 235, 219); */
+}
+/* Color for "+" and "-" boxes in filter boxes when pointer is over */
+.bbop-js-text-button-sim:hover {
+ background-color: #d0ffee;
+}
+/* colors of "+' "-" boxes when pointer is NOT over */
+.bbop-js-text-button-sim {
+ cursor: pointer;
+ background-color: #eeb05a;
+ border-style: solid;
+ border-color: #3875d7;
+ border-width: 1px;
+ padding-left: 0.5em;
+ padding-right: 0.5em;
+ /* padding-top: 0em; */
+ /* padding-bottom: 0em; */
+}
+/* Header lines for search table header */
+.bbop-js-search-pane-filter-table thead tr {
+    background-color: #f7d3a2;
+}
+/* Search results header color */
+.bbop-js-search-pane-results-table thead tr {
+    background-color: #f7d3a2;
+}
+/* Button colors */
+.btn-primary {
+  background-color: #f7d3a2;
+  color: #333;
+  border-color: #e7e7e7;
+}
+/* Large box belowe header on landing page */
+.jumbotron {
+  background-color: #fdebdb;
+
