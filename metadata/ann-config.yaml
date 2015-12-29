@@ -299,7 +299,7 @@ fields:
     property: []
   - id: evidence_with
     description: "Evidence with/from."
-    display_name: Evidence with
+    display_name: with/from
     type: string
     searchable: true
     cardinality: multi
