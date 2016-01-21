@@ -90,19 +90,6 @@ fields:
     searchable: true
     type: string
     property: []
-## PANTHER
-  - id: panther_family
-    description: PANTHER family IDs that are associated with this entity.
-    display_name: PANTHER family
-    type: string
-    searchable: true
-    property: []
-  - id: panther_family_label
-    description: PANTHER families that are associated with this entity.
-    display_name: PANTHER family
-    type: string
-    searchable: true
-    property: []
 ## Taxon
   - id: taxon
     description: "GAF column 13 (taxon)."
