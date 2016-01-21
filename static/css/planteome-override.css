@@ -21,9 +21,10 @@ color: '#4e5679';
 }
 /* Alert bar, should only be on dev site */
 .alert-info {
-  color: #31708f;
-  background-color: #eeb05a;
-  border-color: #bce8f1;
+  color: #000000;
+  background-color: #afcfef;
+  border-color: #222222;
+  font-size: 20px;
 }
 /* Information bar */
 .panel-default>.panel-heading {
