@@ -783,93 +783,93 @@ sub _resolve_page_settings {
   my $page_name = shift || 'amigo';
 
   ## Sensible defaults.
-  my $page_title = 'AmiGO 2';
+  my $page_title = 'Planteome';
   my $page_content_title = 'AmiGO Help';
   my $wiki_base = 'http://wiki.geneontology.org/index.php/';
   my $page_help_link = $wiki_base . 'AmiGO_2_Manual';
 
   if( $page_name eq 'browse' ){
-    $page_title = 'AmiGO 2: Browse';
+    $page_title = 'Planteome: Browse';
     $page_content_title = 'Browse';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Browse';
   }elsif( $page_name eq 'dd_browse' ){
-    $page_title = 'AmiGO 2: Drill-down Browse';
+    $page_title = 'Planteome: Drill-down Browse';
     $page_content_title = 'Drill-down Browse';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Drill-down_Browse';
   }elsif( $page_name eq 'free_browse' ){
-    $page_title = 'AmiGO 2: Free Browse';
+    $page_title = 'Planteome: Free Browse';
     $page_content_title = 'Free Browse';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Free_Browse';
   }elsif( $page_name eq 'landing' ){
-    $page_title = 'AmiGO 2: Welcome';
+    $page_title = 'Planteome: Welcome';
     $page_content_title = 'Home';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Home';
   }elsif( $page_name eq 'goose' ){
-    $page_title = 'AmiGO 2: GO Online SQL/Solr Environment (GOOSE)';
+    $page_title = 'Planteome: GO Online SQL/Solr Environment (GOOSE)';
     $page_content_title = 'GO Online SQL/Solr Environment (GOOSE)';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_GOOSE';
   }elsif( $page_name eq 'gannet' ){
-    $page_title = 'AmiGO 2';
+    $page_title = 'Planteome';
     $page_content_title = 'Gannet';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Gannet';
   }elsif( $page_name eq 'grebe' ){
-    $page_title = 'AmiGO 2: Grebe';
+    $page_title = 'Planteome: Grebe';
     $page_content_title = 'Grebe Search Wizard';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Grebe';
   }elsif( $page_name eq 'visualize' ){
-    $page_title = 'AmiGO 2: Visualize';
+    $page_title = 'Planteome: Visualize';
     $page_content_title = 'Visualize an Arbitrary GO Graph';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Visualize';
   }elsif( $page_name eq 'visualize_freeform' ){
-    $page_title = 'AmiGO 2: Visualize Freeform';
+    $page_title = 'Planteome: Visualize Freeform';
     $page_content_title = 'Visualize an Arbitrary Graph';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Visualize_Freeform';
   }elsif( $page_name eq 'live_search' ){
-    $page_title = 'AmiGO 2: Search';
+    $page_title = 'Planteome: Search';
     $page_content_title = 'Search';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Search';
   }elsif( $page_name eq 'simple_search' ){
-    $page_title = 'AmiGO 2: Simple Search';
+    $page_title = 'Planteome: Simple Search';
     $page_content_title = 'Simple Search';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Simple_Search';
   }elsif( $page_name eq 'medial_search' ){
-    $page_title = 'AmiGO 2: Search Directory';
+    $page_title = 'Planteome: Search Directory';
     $page_content_title = 'Search Directory';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Search_Directory';
   }elsif( $page_name eq 'bulk_search' ){
-    $page_title = 'AmiGO 2: Bulk Search';
+    $page_title = 'Planteome: Bulk Search';
     $page_content_title = 'Bulk Search';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Bulk_Search';
   }elsif( $page_name eq 'software_list' ){
-    $page_title = 'AmiGO 2: Tools and Resources';
+    $page_title = 'Planteome: Tools and Resources';
     $page_content_title = 'Tools and Resources';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Tools_and_Resources';
   }elsif( $page_name eq 'term' ){ # typically won't use
-    $page_title = 'AmiGO 2';
+    $page_title = 'Planteome';
     $page_content_title = 'Term Page';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Term_Page';
   }elsif( $page_name eq 'gene_product' ){ # typically won't use
-    $page_title = 'AmiGO 2';
+    $page_title = 'Planteome';
     $page_content_title = 'Gene Product Page';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Gene_Product_Page';
   }elsif( $page_name eq 'model' ){ # typically won't use
-    $page_title = 'AmiGO 2';
+    $page_title = 'Planteome';
     $page_content_title = 'Model Page';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Model_Page';
   }elsif( $page_name eq 'schema_details' ){
-    $page_title = 'AmiGO 2: Schema Details';
+    $page_title = 'Planteome: Schema Details';
     $page_content_title = 'Instance Schema Details';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Schema_Details';
   }elsif( $page_name eq 'load_details' ){
-    $page_title = 'AmiGO 2: Load Details';
+    $page_title = 'Planteome: Load Details';
     $page_content_title = 'Current instance load information';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Load_Details';
   }elsif( $page_name eq 'owltools_details' ){
-    $page_title = 'AmiGO 2: OWLTools/Loader Details';
+    $page_title = 'Planteome: OWLTools/Loader Details';
     $page_content_title = 'Current OWLTools and loader information';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_OWLTools_Details';
   }elsif( $page_name eq 'xrefs' ){
-    $page_title = 'AmiGO 2: Cross References';
+    $page_title = 'Planteome: Cross References';
     $page_content_title = 'Current Cross Reference Abbreviations';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Cross_References';
   }
@@ -1261,15 +1261,12 @@ sub generate_template_page_with {
   ## Before we start, make sure that the beta is announced.
   my $is_beta = $self->_atoi($self->{CORE}->amigo_env('AMIGO_BETA'));
   if( defined $is_beta && $is_beta ){
-    $self->add_mq('notice', 'You are using an'.
-		  ' <a title="Go to AmiGO Labs explanation page"'.
-		  ' href="http://wiki.geneontology.org/index.php/AmiGO_Labs"'.
+    $self->add_mq('notice', 'You are using the'.
+		  ' development site of the Planteome ontology browser. See ' .
+		  ' <a title="Go to Planteome main site"'.
+		  ' href="http://browser.planteome.org"'.
 		  ' class="alert-link">'.
-		  ' AmiGO Labs</a> prototype. See ' .
-		  ' <a title="Go to AmiGO Labs explanation page"'.
-		  ' href="http://wiki.geneontology.org/index.php/AmiGO_Labs"'.
-		  ' class="alert-link">'.
-		  ' here</a> for more information.');
+		  ' here</a> for the live browser.');
   }
 
   ## Generate the page output.
@@ -1408,7 +1405,7 @@ sub mode_status {
   $self->set_template_parameter('service_name', $service_name);
   $self->set_template_parameter('hid', $self->{CORE}->current_time());
   $self->set_template_parameter('page_title',
-				'AmiGO 2: Service Status for ' . $service_name);
+				'Planteome: Service Status for ' . $service_name);
 
   my $prep =
     {
@@ -1480,7 +1477,7 @@ sub mode_fatal {
 
   $self->header_add( -status => '500 Internal Server Error' );
 
-  $self->set_template_parameter('page_title', 'AmiGO 2: Fatal Error');
+  $self->set_template_parameter('page_title', 'Planteome: Fatal Error');
   # # $self->{CORE}->kvetch('ERROR: falling into mode_error: ' . $@);
   # my $ers = [];
   # # foreach my $er ($@, $!, $?, $^E){
@@ -1533,7 +1530,7 @@ sub mode_fatal {
 #   my $self = shift;
 #   my $message = shift || '';
 #   $self->header_add( -status => '500 Internal Server Error' );
-#   $self->set_template_parameter('page_title', 'AmiGO 2: Fatal Error');
+#   $self->set_template_parameter('page_title', 'Planteome: Fatal Error');
 #   $self->set_template_parameter('error', $message);
 #   $self->add_template_content('common/error.tmpl');
 #   #return $self->generate_template_page();
@@ -1549,7 +1546,7 @@ sub mode_not_found {
 
   $self->header_add( -status => '404 Not Found');
   $self->set_template_parameter('page_title',
-				'AmiGO 2: Enitity Not Found (404)');
+				'Planteome: Enitity Not Found (404)');
   $self->set_template_parameter('amigo_mode', 'not_found');
 
   $self->set_template_parameter('input_id', $input_id);
@@ -1625,9 +1622,9 @@ sub mode_generic_message {
   ## Deeper page settings.
   if( $args->{error} ){
     $self->header_add( -status => '500 Internal Server Error' );
-    $self->set_template_parameter('page_title', 'AmiGO 2: 500 Error');
+    $self->set_template_parameter('page_title', 'Planteome: 500 Error');
   }else{
-    $self->set_template_parameter('page_title', 'AmiGO 2: Message');
+    $self->set_template_parameter('page_title', 'Planteome: Message');
   }
 
   ## Purge content buffers.
