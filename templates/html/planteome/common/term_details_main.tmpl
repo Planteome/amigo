@@ -149,7 +149,20 @@
 	Contact the
 	<a href="http://planteome.org/contact" title="Planteome feedback.">Planteome feedback</a>
 	if you find mistakes or have concerns
-	about the data you find here.
+	about the data you find here. 
+      [% IF (matches = TERM_INFO.acc.match('^GO')) %]
+	<br>Comments, changes to terms, or requests for new ontology terms can be made at <a href="https://github.com/geneontology/go-ontology/issues/">GO issue tracker on GitHub</a>.
+      [% ELSIF (matches = TERM_INFO.acc.match('^PO')) %]
+	<br>Comments, changes to terms, or requests for new ontology terms can be made at <a href="https://github.com/planteome/plant-ontology/issues/">PO issue tracker on GitHub</a>.
+      [% ELSIF (matches = TERM_INFO.acc.match('^TO')) %]
+	<br>Comments, changes to terms, or requests for new ontology terms can be made at <a href="https://github.com/planteome/planti-trait-ontology/issues/">TO issue tracker on GitHub</a>.
+      [% ELSIF (matches = TERM_INFO.acc.match('^EO')) %]
+	<br>Comments, changes to terms, or requests for new ontology terms can be made at <a href="https://github.com/planteome/plant-environement-ontology/issues/">EO issue tracker on GitHub</a>.
+      [% ELSIF (matches = TERM_INFO.acc.match('^PSO')) %]
+	<br>Comments, changes to terms, or requests for new ontology terms can be made at <a href="https://github.com/planteome/plant-stress-ontology/issues/">PSO issue tracker on GitHub</a>.
+      [% ELSIF (matches = TERM_INFO.acc.match('^PATO')) %]
+	<br>Comments, changes to terms, or requests for new ontology terms can be made at <a href="https://github.com/pato-ontology/pato/issues/">PATO issue tracker on GitHub</a>.
+      [% END %]
       </dd>
 
     </dl>
