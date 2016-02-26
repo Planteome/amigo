@@ -72,6 +72,7 @@ sub setup {
 		   'term'                => 'mode_term_details',
 		   'gene_product'        => 'mode_gene_product_details',
 		   'model'               => 'mode_model_details',
+		   'biology'             => 'mode_model_biology',
 		   'software_list'       => 'mode_software_list',
 		   'schema_details'      => 'mode_schema_details',
 		   'load_details'        => 'mode_load_details',
@@ -1131,7 +1132,7 @@ sub mode_search {
   ## Now add the filters that come in from the YAML-defined simple
   ## public bookmarking API.
   $filters = $self->_add_search_bookmark_api_to_filters($params, $filters);
-  
+
   ## Try and come to terms with Galaxy.
   my($in_galaxy, $galaxy_external_p) = $i->comprehend_galaxy();
   $self->galaxy_settings($in_galaxy, $galaxy_external_p);
@@ -1149,11 +1150,15 @@ sub mode_search {
   my $page_name = 'live_search';
   my($page_title, 
      $page_content_title,
-     $page_help_link) = $self->_resolve_page_settings($page_name);  
+     $page_help_link) = $self->_resolve_page_settings($page_name);
   $self->set_template_parameter('page_name', $page_name);
   $self->set_template_parameter('page_title', $page_title);
   $self->set_template_parameter('page_content_title', $page_content_title);
   $self->set_template_parameter('page_help_link', $page_help_link);
+
+  ## See if there is a desired browsing filter.
+  my $browse_filter_idspace =
+    $self->{WEBAPP_TEMPLATE_PARAMS}{browse_filter_idspace} || undef;
 
   ## Make sure the personality is in our known set if it's even
   ## defined.
@@ -1222,6 +1227,8 @@ sub mode_search {
       $self->{JS}->make_var('global_live_search_bookmark', $bookmark),
       $self->{JS}->make_var('global_live_search_query', $query),
       $self->{JS}->make_var('global_live_search_filters', $filters),
+      $self->{JS}->make_var('global_live_search_filter_idspace',
+			    $browse_filter_idspace),
       $self->{JS}->make_var('global_live_search_pins', $pins),
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('LiveSearchGOlr.js')
@@ -1842,7 +1849,7 @@ sub mode_model_details {
   my $input_id = $params->{model};
 
   ## Input sanity check.
-  if( ! $input_id ){
+  if ( ! $input_id ) {
     return $self->mode_fatal("No input model annotation argument.");
   }
 
@@ -1859,9 +1866,9 @@ sub mode_model_details {
   my $ma_info_hash = $ma_worker->get_info();
 
   ## First make sure that things are defined.
-  if( ! defined($ma_info_hash) ||
-      $self->{CORE}->empty_hash_p($ma_info_hash) ||
-      ! defined($ma_info_hash->{$input_id}) ){
+  if ( ! defined($ma_info_hash) ||
+       $self->{CORE}->empty_hash_p($ma_info_hash) ||
+       ! defined($ma_info_hash->{$input_id}) ) {
     return $self->mode_not_found($input_id, 'model');
   }
 
@@ -1879,19 +1886,32 @@ sub mode_model_details {
 				'AmiGO 2: Model Details for ' .
 				$input_id);
   my($page_title, $page_content_title, $page_help_link) =
-      $self->_resolve_page_settings('model');
+    $self->_resolve_page_settings('model');
   $self->set_template_parameter('page_help_link', $page_help_link);
 
   ## Figure out the best title we can.
-  my $best_title = $input_id; # start with the worst
-  if ( $ma_info_hash->{$input_id}{'model_label'} ){
+  my $best_title = $input_id;	# start with the worst
+  if ( $ma_info_hash->{$input_id}{'model_label'} ) {
     $best_title = $ma_info_hash->{$input_id}{'model_label'};
   }
   $self->set_template_parameter('page_content_title', $best_title);
 
+  ## Extract the string representation of the model.
+  my $model_json = undef;
+  if ( $ma_info_hash->{$input_id}{'model_graph'} ) {
+    my $model_annotation_string = $ma_info_hash->{$input_id}{'model_graph'};
+    $model_json = $self->{CORE}->_read_json_string($model_annotation_string);
+  }
+  ## Because of the round-tripping, it's possible to have information,
+  ## but no model.
+  if ( $model_json ) {
+    $self->set_template_parameter('has_model_content_p', 1);
+  } else {
+    $self->set_template_parameter('has_model_content_p', 0);
+  }
+
   ## BUG/TODO: Some silliness to get the variables right; will need to
   ## revisit later on.
-  ## TODO/BUG: Again, temporary badness for Noctua.
   my $github_base =
     'https://github.com/geneontology/noctua-models/blob/master/models/';
   my $noctua_base = $self->{WEBAPP_TEMPLATE_PARAMS}{noctua_base};
@@ -1936,9 +1956,81 @@ sub mode_model_details {
       ## Things to make AmiGOCytoView.js work. HACKY! TODO/BUG
       $self->{JS}->make_var('global_id', $input_id),
       ## TODO: get load to have same as wire protocol.
-      $self->{JS}->make_var('global_model', undef),
+      $self->{JS}->make_var('global_model', $model_json),
       # $self->{JS}->make_var('global_model',
       # 			    $ma_info_hash->{$input_id}{'model_graph'}),
+      $self->{JS}->make_var('global_barista_token',  undef),
+      $self->{JS}->make_var('global_minerva_definition_name',
+			    "minerva_public"),
+      $self->{JS}->make_var('global_barista_location',
+			    "http://barista.berkeleybop.org"),
+      $self->{JS}->make_var('global_collapsible_relations',
+			    ["RO:0002333",
+			     "BFO:0000066",
+			     "RO:0002233",
+			     "RO:0002488"])
+     ],
+     javascript_init =>
+     [
+      'GeneralSearchForwardingInit();' #,
+      #'ModelDetailsInit();'
+     ],
+     content =>
+     [
+      'pages/model_details.tmpl'
+     ]
+    };
+  $self->add_template_bulk($prep);
+
+  return $self->generate_template_page_with();
+}
+
+
+## Model /all/ noctua annotation information.
+sub mode_model_biology {
+
+  my $self = shift;
+
+  ## Warn people away for now.
+  $self->add_mq('warning',
+		'This page is considered <strong>ALPHA</strong> software.');
+
+  ###
+  ### Standard setup.
+  ###
+
+  ## Page settings.
+  ## Again, a little special.
+  $self->set_template_parameter('page_name', 'biology');
+  $self->set_template_parameter('page_title', 'AmiGO 2: Biology');
+  my($page_title, $page_content_title, $page_help_link) =
+      $self->_resolve_page_settings('biology');
+  $self->set_template_parameter('page_help_link', $page_help_link);
+
+  ## Our AmiGO services CSS.
+  my $prep =
+    {
+     css_library =>
+     [
+      #'standard',
+      'com.bootstrap',
+      'com.jquery.jqamigo.custom',
+      'amigo',
+      'bbop'
+     ],
+     javascript_library =>
+     [
+      'com.jquery',
+      'com.bootstrap',
+      'com.jquery-ui',
+      'bbop',
+      'amigo2'
+     ],
+     javascript =>
+     [
+      $self->{JS}->get_lib('GeneralSearchForwarding.js'),
+      $self->{JS}->get_lib('AmiGOBioView.js'),
+      $self->{JS}->make_var('global_model', undef),
       $self->{JS}->make_var('global_barista_token',  undef),
       $self->{JS}->make_var('global_minerva_definition_name',
 			    "minerva_public"),
@@ -1957,7 +2049,7 @@ sub mode_model_details {
      ],
      content =>
      [
-      'pages/model_details.tmpl'
+      'pages/model_biology.tmpl'
      ]
     };
   $self->add_template_bulk($prep);
