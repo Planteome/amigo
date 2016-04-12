@@ -3,6 +3,10 @@ AMIGO_1X_PUBLIC_CGI_BASE_URL:
   comment: The public URL of an available AmiGO 1.x instance for link references.
   type: url
   value: http://planteome.org/amigo/cgi-bin/crop-amigo/go.cgi
+AMIGO_API_PORT:
+  comment: OPTIONAL. The port on which to make available the experimental AmiGO JSON API. Defaults to 6455.
+  type: number
+  value: 6455
 AMIGO_BALANCER:
   comment: 'Mark this AmiGO 2 installation as behind a load balanacer or similar system. The practical effect of this flag is that if AmiGO detects *.error files (usually created by the global-message.pl script), it will return a 503 page signalling any upstream system that the instance is not currently ready.'
   type: boolean
@@ -42,6 +46,11 @@ AMIGO_PUBLIC_GALAXY_URL:
   comment: Please enter the public URL of the Galaxy server.
   type: url
   value: http://galaxy.planteome.org/
+AMIGO_PUBLIC_GOLR_BULK_URL:
+  comment: The public URL of the GOlr bulk download server (including slash); possibly the same as AMIGO_PUBLIC_GOLR_URL.
+  type: url
+  value: http://dev.planteome.org/solr/
+>>>>>>> upstream/master
 AMIGO_PUBLIC_GOLR_URL:
   comment: 'The public URL of the GOlr server (including slash); this is the one called by AmiGO resource, JS, etc.'
   type: url
@@ -54,6 +63,16 @@ AMIGO_ROOT:
   comment: 'Unless you are doing something strange, the parent directory of this file.'
   type: directory
   value: /data/www/planteome_dev/amigo
+AMIGO_ROOT_TERMS:
+  comment: 'For some widgets, we need to know what root terms you are going to be considering in your ontology. Requires both "id" and "label" to be defined.'
+  type: json
+  value:
+    - id: GO:0008150
+      label: biological process
+    - id: GO:0005575
+      label: cellular component
+    - id: GO:0003674
+      label: molecular function
 AMIGO_SERVER_NAME:
   comment: 'The name by which your AmiGO instance wishes to known--think load balancer or cache situations. If you would rather this information not be reported, leave blank.'
   type: string
@@ -117,6 +136,12 @@ GOLR_METADATA_LIST:
     - /data/www/planteome_dev/amigo/metadata/bio-config.yaml
     - /data/www/planteome_dev/amigo/metadata/ann-config.yaml
     - /data/www/planteome_dev/amigo/metadata/general-config.yaml
+    - /data/www/planteome_dev/amigo/metadata/bio-config.browse.yaml
+    - /data/www/planteome_dev/amigo/metadata/ann-config.browse.yaml
+    - /data/www/planteome_dev/amigo/metadata/model-ann-config.yaml
+    - /data/www/planteome_dev/amigo/metadata/noctua-model-meta-config.yaml
+    - /data/www/planteome_dev/amigo/metadata/protein-family-config.yaml
+    - /data/www/planteome_dev/amigo/metadata/ann_ev_agg-config.yaml
 GOLR_METADATA_ONTOLOGY_LOCATION:
   comment: The full path to the ontology YAML config file. This is core for any ontology-related load.
   type: file
@@ -139,9 +164,9 @@ OWLTOOLS_MAX_MEMORY:
   type: string
   value: 20G
 OWLTOOLS_USE_MERGE_IMPORT:
-  comment: Whether or not to include --merge-import http://purl.obolibrary.org/obo/go/extensions/go-plus.owl.
+  comment: Whether or not to include --merge-import http://purl.obolibrary.org/obo/go/extensions/go-gaf.owl.
   type: boolean
-  value: 0
+  value: 1
 OWLTOOLS_USE_REMOVE_DISJOINTS:
   comment: Whether or not to include --remove-disjoints.
   type: boolean

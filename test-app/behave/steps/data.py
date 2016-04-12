@@ -9,12 +9,12 @@ def step_impl(context, number):
 
     ## Get the right element by class association.
     ## WARNING: would work with only one widget on a page.
-    target_clss = "bbop-js-search-pane-meta"
+    target_clss = "bbop-widget-set-live-pager"
     webelt = context.browser.find_element_by_class_name(target_clss)
     eltext = webelt.text
 
     ## Extract by bounding between ': ' and ';'
-    btm = eltext.index(': ')
+    btm = eltext.index(': ') +2
     top = eltext.index(';')
     if btm != -1 and top != -1:
         found_number = eltext[btm:top]

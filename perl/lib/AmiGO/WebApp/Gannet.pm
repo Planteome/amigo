@@ -202,7 +202,9 @@ sub mode_gannet {
 
   ## Try and come to terms with Galaxy.
   my($in_galaxy, $galaxy_external_p) = $i->comprehend_galaxy('gannet');
-  $self->galaxy_settings($in_galaxy, $galaxy_external_p);
+  ## NOTE: disabling Galaxy.
+  #$self->galaxy_settings($in_galaxy, $galaxy_external_p);
+  $self->galaxy_settings(undef, 0);
 
   ## Get various examples from the wiki.
   $self->set_template_parameter('golr_examples_list',
@@ -231,11 +233,11 @@ sub mode_gannet {
   my $default_mirror = 'amigo_2_local_default';
   $mirror_conf_info->{$default_mirror} =
     {
-     'database' => $self->{CORE}->amigo_env('AMIGO_PUBLIC_GOLR_URL'),
-     'location' => 'in this installation',
+     'database' => $self->{CORE}->amigo_env('AMIGO_PUBLIC_GOLR_BULK_URL'),
+     'location' => 'at this installation',
      'type' => 'solr',
      'class' => 'local',
-     'label' => 'This installation'
+     'label' => 'Current'
     };
 
   #$self->{CORE}->kvetch("_mirror_conf_info_dump_:".Dumper($mirror_conf_info));
@@ -562,11 +564,14 @@ sub mode_gannet {
     $self->set_template_parameter('mirror_info', $mirror_conf_info);
 
     ## Page settings.
-    $self->set_template_parameter('page_name', 'gannet');
-    $self->set_template_parameter('page_title',
-				  'Gannet: GOOSE-like Solr Environment');
-    $self->set_template_parameter('content_title',
-				  'Gannet: GOOSE-like Solr Environment');
+    my $page_name = 'gannet';
+    my($page_title,
+       $page_content_title,
+       $page_help_link) = $self->_resolve_page_settings($page_name);
+    $self->set_template_parameter('page_name', $page_name);
+    $self->set_template_parameter('page_title', $page_title);
+    $self->set_template_parameter('page_content_title', $page_content_title);
+    $self->set_template_parameter('page_help_link', $page_help_link);
 
     ## 
     $self->{CORE}->kvetch("pre-template limit: " . $in_limit);
@@ -589,19 +594,12 @@ sub mode_gannet {
        [
 	'com.jquery',
 	'com.bootstrap',
-	'com.jquery-ui',
-	'bbop',
-	'amigo2'
+	'com.jquery-ui'
        ],
        javascript =>
        [
 	$self->{JS}->get_lib('GeneralSearchForwarding.js'),
 	$self->{JS}->get_lib('Gannet.js')
-       ],
-       javascript_init =>
-       [
-	'GeneralSearchForwardingInit();',
-	'GannetInit();'
        ],
        content =>
        [

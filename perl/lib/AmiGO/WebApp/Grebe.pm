@@ -130,6 +130,7 @@ sub mode_grebe {
       my $translations = $question_info->{'field_translations'} || [];
       foreach my $trans (@$translations){
 
+	## Go ahead and add the rest.
 	my $field_id = $trans->{'field_id'};
 	my $field_placeholder = $trans->{'placeholder_text'} || '';
 
@@ -141,7 +142,7 @@ sub mode_grebe {
 		' title="Hint: add a space after completing a word to' .
 		  ' narrow the search."' .
 		    ' style="width: 10em;"' .
-		    '>';
+		      '>';
 	my $ind = index($question, $from);
 	substr($question, $ind, length($from)) = $to;
 	#$question =~ s/$from/$to/;
@@ -186,20 +187,13 @@ sub mode_grebe {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('Grebe.js'),
       $self->{JS}->make_var('global_grebe_questions', $questions_info),
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'GrebeInit();'
      ],
      content =>
      [

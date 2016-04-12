@@ -71,19 +71,12 @@ sub mode_matrix {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      #'com.jquery.jstree',
-      'bbop',
-      'amigo2'
+      'ly.plot'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('Matrix.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'MatrixInit()',
      ],
      content =>
      [

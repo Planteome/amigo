@@ -67,7 +67,9 @@ sub setup {
 		   'specific_search'     => 'mode_search',
 		   'bulk_search'         => 'mode_bulk_search',
 		   'browse'              => 'mode_browse',
+		   'specific_browse'     => 'mode_browse',
 		   'dd_browse'           => 'mode_dd_browse',
+		   'base_statistics'     => 'mode_base_statistics',
 		   'free_browse'         => 'mode_free_browse',
 		   'term'                => 'mode_term_details',
 		   'gene_product'        => 'mode_gene_product_details',
@@ -201,18 +203,13 @@ sub mode_landing {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      #'bbop',
+      #'amigo2'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('LandingGraphs.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'LandingGraphsInit();'
      ],
      content =>
      [
@@ -233,16 +230,25 @@ sub mode_browse {
 
   my $i = AmiGO::Input->new($self->query());
   my $params = $i->input_profile();
+  ## Deal with the different types of dispatch we might be facing.
+  $params->{term} = $self->param('term')
+    if ! $params->{term} && $self->param('term');
 
   ## Page settings.
   my $page_name = 'browse';
-  my($page_title, 
+  my($page_title,
      $page_content_title,
-     $page_help_link) = $self->_resolve_page_settings($page_name);  
+     $page_help_link) = $self->_resolve_page_settings($page_name);
   $self->set_template_parameter('page_name', $page_name);
   $self->set_template_parameter('page_title', $page_title);
   $self->set_template_parameter('page_content_title', $page_content_title);
   $self->set_template_parameter('page_help_link', $page_help_link);
+
+  ## See if we are looking at a specific term, or just browsing.
+  my $in_term = $params->{term};
+  if( $in_term ){
+    $self->set_template_parameter('in_term', $in_term);
+  }
 
   ## Get the layout info to describe which buttons should be
   ## generated.
@@ -267,19 +273,13 @@ sub mode_browse {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
-      $self->{JS}->get_lib('Browse.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'BrowseInit();'
+      $self->{JS}->get_lib('Browse.js'),
+      $self->{JS}->make_var('global_in_term', $in_term)
      ],
      content =>
      [
@@ -310,13 +310,69 @@ sub mode_dd_browse {
   $self->set_template_parameter('page_content_title', $page_content_title);
   $self->set_template_parameter('page_help_link', $page_help_link);
 
-  ## Get the layout info to describe which buttons should be
-  ## generated.
-  #my $bbinfo = $self->{CORE}->get_amigo_layout('AMIGO_LAYOUT_BROWSE');
-  #$self->set_template_parameter('browse_button_info', $bbinfo);
-  ## Pick the first to be the default.
-  #my $sb = $$bbinfo[0]->{id};
-  #$self->set_template_parameter('starting_button', $sb);
+  ## Our AmiGO services CSS.
+  my $prep =
+    {
+     css_library =>
+     [
+      #'standard',
+      'com.bootstrap',
+      'com.jquery.jqamigo.custom',
+      'com.jstree',
+      'amigo',
+      'bbop'
+     ],
+     javascript_library =>
+     [
+      'com.jquery',
+      'com.bootstrap',
+      'com.jquery-ui',
+      'com.jstree'
+     ],
+     javascript =>
+     [
+      $self->{JS}->get_lib('GeneralSearchForwarding.js'),
+      $self->{JS}->get_lib('DDBrowse.js')
+     ],
+     content =>
+     [
+      'pages/dd_browse.tmpl'
+     ]
+    };
+  $self->add_template_bulk($prep);
+
+  return $self->generate_template_page_with();
+}
+
+
+##
+sub mode_base_statistics {
+
+  my $self = shift;
+
+  my $i = AmiGO::Input->new($self->query());
+  my $params = $i->input_profile();
+
+  ## Page settings.
+  my $page_name = 'base_statistics';
+  my($page_title, 
+     $page_content_title,
+     $page_help_link) = $self->_resolve_page_settings($page_name);
+  $self->set_template_parameter('page_name', $page_name);
+  $self->set_template_parameter('page_title', $page_title);
+  $self->set_template_parameter('page_content_title', $page_content_title);
+  $self->set_template_parameter('page_help_link', $page_help_link);
+
+  ## Get cached statistics, if possible.
+  my $cache = $self->{CORE}->amigo_statistics_cache();
+  ## Pass existance info to the app.
+  if( %$cache ){
+    $self->set_template_parameter('have_cache_p', 1);
+  }else{
+    $self->set_template_parameter('have_cache_p', 0);
+  }
+
+  $self->set_template_parameter('page_help_link', $page_help_link);
 
   ## Our AmiGO services CSS.
   my $prep =
@@ -335,23 +391,17 @@ sub mode_dd_browse {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'com.jstree',
-      'bbop',
-      'amigo2'
+      'ly.plot'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
-      $self->{JS}->get_lib('DDBrowse.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'DDBrowseInit();'
+      $self->{JS}->get_lib('BaseStatistics.js'),
+      $self->{JS}->make_var('global_statistics_cache', $cache)
      ],
      content =>
      [
-      'pages/dd_browse.tmpl'
+      'pages/base_statistics.tmpl'
      ]
     };
   $self->add_template_bulk($prep);
@@ -414,7 +464,6 @@ sub mode_free_browse {
      ],
      javascript_init =>
      [
-      'GeneralSearchForwardingInit();',
       'FreeBrowseInit();'
      ],
      content =>
@@ -623,16 +672,10 @@ sub mode_simple_search {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'bbop',
-      'amigo2'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();'
      ],
      content =>
      [
@@ -782,20 +825,13 @@ sub mode_medial_search {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('Medial.js'),
       $self->{JS}->make_var('global_acc', $probable_term)
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'MedialInit();'
      ],
      content =>
      [
@@ -818,9 +854,9 @@ sub mode_software_list {
 
   ## Page settings.
   my $page_name = 'software_list';
-  my($page_title, 
+  my($page_title,
      $page_content_title,
-     $page_help_link) = $self->_resolve_page_settings($page_name);  
+     $page_help_link) = $self->_resolve_page_settings($page_name);
   $self->set_template_parameter('page_name', $page_name);
   $self->set_template_parameter('page_title', $page_title);
   $self->set_template_parameter('page_content_title', $page_content_title);
@@ -857,18 +893,11 @@ sub mode_software_list {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      #'com.jquery.tablesorter',
-      'bbop',
-      'amigo2'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();'
      ],
      content =>
      [
@@ -920,19 +949,12 @@ sub mode_schema_details {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'com.jquery.tablesorter',
-      'bbop',
-      'amigo2'
+      'com.jquery.tablesorter'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('Schema.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'SchemaInit();'
      ],
      content =>
      [
@@ -1014,19 +1036,12 @@ sub mode_load_details {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'com.jquery.tablesorter',
-      'bbop',
-      'amigo2'
+      'com.jquery.tablesorter'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('LoadDetails.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'LoadDetailsInit();'
      ],
      content =>
      [
@@ -1085,17 +1100,10 @@ sub mode_owltools_details {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'com.jquery.tablesorter',
-      'bbop',
-      'amigo2'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js')
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
      ],
      content =>
      [
@@ -1217,9 +1225,7 @@ sub mode_search {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      'com.jquery-ui'
      ],
      javascript =>
      [
@@ -1233,16 +1239,26 @@ sub mode_search {
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('LiveSearchGOlr.js')
      ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'LiveSearchGOlrInit();'
-     ],
      content =>
      [
       'pages/live_search_golr.tmpl'
      ]
     };
+
+  ## Secret geospatial demo mode.
+  if( 0 ){
+    ## Libs.
+    unshift @{$prep->{css_library}},
+      'http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css';
+    unshift @{$prep->{javascript_library}},
+      'http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js';
+    ## JS var.
+    unshift @{$prep->{javascript}},
+      $self->{JS}->make_var('global_use_geospatial', 1);
+    ## Template.
+    $self->set_template_parameter('use_geospatial', 1);
+  }
+
   $self->add_template_bulk($prep);
   return $self->generate_template_page_with();
 }
@@ -1265,7 +1281,7 @@ sub mode_bulk_search {
   my $page_name = 'bulk_search';
   my($page_title, 
      $page_content_title,
-     $page_help_link) = $self->_resolve_page_settings($page_name);  
+     $page_help_link) = $self->_resolve_page_settings($page_name);
   $self->set_template_parameter('page_name', $page_name);
   $self->set_template_parameter('page_title', $page_title);
   $self->set_template_parameter('page_content_title', $page_content_title);
@@ -1335,8 +1351,8 @@ sub mode_bulk_search {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      #'bbop',
+      #'amigo2'
      ],
      javascript =>
      [
@@ -1347,11 +1363,11 @@ sub mode_bulk_search {
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
       $self->{JS}->get_lib('BulkSearch.js')
      ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'BulkSearchInit();'
-     ],
+     # javascript_init =>
+     # [
+     #  'GeneralSearchForwardingInit();',
+     #  'BulkSearchInit();'
+     # ],
      content =>
      [
       'pages/bulk_search.tmpl'
@@ -1394,7 +1410,7 @@ sub mode_term_details {
   ## Now add the filters that come in from the YAML-defined simple
   ## public bookmarking API.
   $filters = $self->_add_search_bookmark_api_to_filters($params, $filters);
-  
+
   ## Input sanity check.
   if( ! $input_term_id ){
     return $self->mode_fatal("No term acc input argument.");
@@ -1533,7 +1549,18 @@ sub mode_term_details {
   				$anc_info->{parent_chunks_by_depth});
   push @$acc_list_for_gpc_info, @{$anc_info->{seen_acc_list}};
 
-  ## Bridge variables from old system.
+  ###
+  ### Get term ultra-local neighborhood information.
+  ###
+
+  my $nay_info = $term_worker->get_neighborhood_info($input_term_id);
+  #$self->set_template_parameter('NEIGHBORHOOD_INFO', Dumper($nay_info));
+  $self->set_template_parameter('NEIGHBORHOOD_INFO', $nay_info);
+
+  ###
+  ### Bridge variables from old system.
+  ###
+
   #$self->set_template_parameter('cgi', 'term-details');
   $self->set_template_parameter('cgi', 'browse');
   $self->set_template_parameter('vbridge', 'term=' . $input_term_id);
@@ -1650,9 +1677,7 @@ sub mode_term_details {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'com.jquery.tablesorter',
-      'bbop',
-      'amigo2'
+      'com.jquery.tablesorter'
      ],
      javascript =>
      [
@@ -1667,11 +1692,6 @@ sub mode_term_details {
       $self->{JS}->make_var('global_label',
 			    $term_info_hash->{$input_term_id}{'name'}),
       $self->{JS}->make_var('global_acc', $input_term_id)
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'TermDetailsInit();'
      ],
      content =>
      [
@@ -1715,7 +1735,7 @@ sub mode_gene_product_details {
   ## Now add the filters that come in from the YAML-defined simple
   ## public bookmarking API.
   $filters = $self->_add_search_bookmark_api_to_filters($params, $filters);
-  
+
   ## Input sanity check.
   if( ! $input_gp_id ){
     return $self->mode_fatal("No input gene product acc argument.");
@@ -1803,9 +1823,7 @@ sub mode_gene_product_details {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      'com.jquery-ui'
      ],
      javascript =>
      [
@@ -1818,11 +1836,6 @@ sub mode_gene_product_details {
       $self->{JS}->make_var('global_live_search_filters', $filters),
       $self->{JS}->make_var('global_live_search_pins', $pins),
       $self->{JS}->make_var('global_acc', $input_gp_id)
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();',
-      'GPDetailsInit();'
      ],
      content =>
      [
@@ -1944,9 +1957,7 @@ sub mode_model_details {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo2'
+      'com.jquery-ui'
      ],
      javascript =>
      [
@@ -1969,11 +1980,6 @@ sub mode_model_details {
 			     "BFO:0000066",
 			     "RO:0002233",
 			     "RO:0002488"])
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();' #,
-      #'ModelDetailsInit();'
      ],
      content =>
      [
@@ -2023,8 +2029,6 @@ sub mode_model_biology {
       'com.jquery',
       'com.bootstrap',
       'com.jquery-ui',
-      'bbop',
-      'amigo2'
      ],
      javascript =>
      [
@@ -2041,11 +2045,6 @@ sub mode_model_biology {
 			     "BFO:0000066",
 			     "RO:0002233",
 			     "RO:0002488"])
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();'#,
-      #'ModelDetailsInit();'
      ],
      content =>
      [
@@ -2118,9 +2117,6 @@ sub mode_phylo_graph {
       #'com.raphael.graffle',
       'bbop',
       'amigo2'
-      #'bbop.model',
-      #'bbop.model.tree',
-      #'bbop.graph.render.phylo',
      ],
      javascript =>
      [
@@ -2130,7 +2126,6 @@ sub mode_phylo_graph {
      ],
      javascript_init =>
      [
-      'GeneralSearchForwardingInit();',
       'PhyloGraphInit();'
      ],
      content =>

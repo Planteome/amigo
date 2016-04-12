@@ -22,21 +22,22 @@
 
 <!-- <div class="col-xs-12 col-sm-9"> -->
 
-[% three_row_classes = "col-xs-12 col-sm-6 col-md-4 col-lg-4" %]
+[% four_row_classes = "col-xs-12 col-sm-6 col-md-3 col-lg-3" %]
+[% three_row_classes = "col-xs-12 col-sm-12 col-md-4 col-lg-4" %]
 [% two_row_classes = "col-xs-12 col-sm-6 col-md-6 col-lg-6" %]
 <div class="container-fluid">
   <div class="row">
 
     <!-- grebe -->
-    [% landing_item_header = "Get Started with Grebe" %]
-    [% landing_item_classes = three_row_classes %]
-    [% landing_item_image = image_dir _ "/grebe.50.png" %]
-    [% landing_item_body = "Use the Grebe Search Wizard to <strong>get started</strong> in exploring the Gene Ontology data." %]
+    [% landing_item_header = "Search Templates" %]
+    [% landing_item_classes = four_row_classes %]
+    [% landing_item_image = image_dir _ "/formula.50.png" %]
+    [% landing_item_body = "Use predefined <b>templates</b> to explore Gene Ontology data." %]
     [% landing_item_link = interlink_grebe %]
     [% INCLUDE "common/landing_item.tmpl" %]
     
     <!-- search -->
-    <div class="[% three_row_classes %]">
+    <div class="[% four_row_classes %]">
       <div class="panel panel-default">
 	<div class="panel-heading">
 	  <h3 class="panel-title">Advanced Search</h3>
@@ -73,20 +74,19 @@
       </div>
     </div>
     
-    <!--   <a href="[% interlink_browse %]"> -->
-    <!-- 	<img src="[% image_dir %]/browse-icon.50.png" -->
-    <!-- 	     title="Browse page." -->
-    <!-- 	     alt="[Browse]" /> -->
-    <!-- 	Interactively <strong>browse the graph</strong> of the Gene -->
-    <!-- 	Ontology term data. -->
-    <!--   </a> -->
-    <!-- </td> -->
+    <!-- dd_browse -->
+    [% landing_item_header = "Browse the ontology" %]
+    [% landing_item_classes = four_row_classes %]
+    [% landing_item_image = image_dir _ "/dd-browse.50.png" %]
+    [% landing_item_body = "Use the drill-down <b>browser</b> to view the ontology structure with annotation counts." %]
+    [% landing_item_link = interlink_dd_browse %]
+    [% INCLUDE "common/landing_item.tmpl" %]
     
     <!-- goose -->
     [% landing_item_header = "GOOSE" %]
-    [% landing_item_classes = three_row_classes %]
+    [% landing_item_classes = four_row_classes %]
     [% landing_item_image = image_dir _ "/goose-1.50.png" %]
-    [% landing_item_body = "Use GOOSE to query a legacy GO database with <strong>SQL</strong> or edit one of the templates." %]
+    [% landing_item_body = "Use GOOSE to query the legacy GO database with <strong>SQL</strong>.<!-- or edit one of the templates.-->" %]
     [% landing_item_link = interlink_goose %]
     [% INCLUDE "common/landing_item.tmpl" %]
     
@@ -112,12 +112,15 @@
 	       make it less tall and more integrated with the A2 environment.  -->
 	  <p>
 	    <form action="[% interlink_rte %]"
-		  class="form-inline" role="form" method="POST">
+		  class="" role="form" method="POST">
 	      <input type="hidden" name="correction" value="bonferroni" />
 	      <!-- <input type="hidden" name="format" value="xml" /> -->
 	      <input type="hidden" name="format" value="html" />
 	      <input type="hidden" name="resource" value="PANTHER" />
-	      <textarea id="landing_gene_input" class="form-control" rows="2" name="input" placeholder="Your genes here..." ></textarea>
+
+	      <div class="form-group">
+		<textarea id="landing_gene_input" class="form-control" rows="2" name="input" placeholder="Your genes here..." ></textarea>
+	      </div>
 	      
 	      <div class="form-group">
 		<!--	<label for="rte_ontology">Ontology</label> -->
@@ -128,9 +131,9 @@
 		  <option value="biological_process">biological process</option>
 		  <option value="molecular_function">molecular function</option>
 		  <option value="cellular_component">cellular component</option>
-		  <option value="biological_process_exp">biological process (experimental only)</option>
-		  <option value="molecular_function_exp">molecular function (experimental only)</option>
-		  <option value="cellular_component_exp">cellular component (experimental only)</option>
+		  <!-- <option value="biological_process_exp">biological process (experimental only)</option> -->
+		  <!-- <option value="molecular_function_exp">molecular function (experimental only)</option> -->
+		  <!-- <option value="cellular_component_exp">cellular component (experimental only)</option> -->
 		</select>
 	      </div>
 	      
@@ -283,8 +286,8 @@
     [% landing_item_header = "Statistics" %]
     [% landing_item_classes = three_row_classes %]
     [% landing_item_image = image_dir _ "/stats-generic.50.png" %]
-    [% landing_item_body = "View the most recent <strong>statistics</strong> about the Gene Ontology data on the main site." %]
-    [% landing_item_link = "http://geneontology.org/page/current-go-statistics" %]
+    [% landing_item_body = "View the most recent <strong>statistics</strong> about the Gene Ontology data in AmiGO." %]
+    [% landing_item_link = interlink_base_statistics %]
     [% INCLUDE "common/landing_item.tmpl" %]
     
     <!-- stat -->

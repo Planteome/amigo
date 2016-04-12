@@ -1,4 +1,6 @@
 ////
+//// gulpfile.js for AmiGO.
+////
 //// Comprehensive for more flexible programmatic replacement for
 //// Makefile (which depended to much on weird hard-coded chains of
 //// ENV vars).
@@ -118,10 +120,10 @@ var paths = {
 	'perl/lib/t/*.t'
     ],
     'tests-js': [
-	'javascript/lib/amigo/*.js.tests',
-	'javascript/lib/amigo/data/*.js.tests',
-	'javascript/lib/amigo/ui/*.js.tests',
-	'javascript/lib/amigo/handlers/*.js.tests'
+	// 'javascript/lib/amigo/*.js.tests',
+	// 'javascript/lib/amigo/data/*.js.tests',
+	// 'javascript/lib/amigo/ui/*.js.tests',
+	// 'javascript/lib/amigo/handlers/*.js.tests'
     ]
 };
 
@@ -138,7 +140,10 @@ if( ! a ){
 }
 
 // Common variables.
-var amigo_version =  a['AMIGO_VERSION'].value;
+//var amigo_version =  a['AMIGO_VERSION'].value;
+var amigo_root_path = a['AMIGO_ROOT'].value;
+var amigo_js_dev_path = amigo_root_path + '/javascript/web';
+var amigo_js_out_path = amigo_root_path + '/javascript/staging';
 var amigo_url = a['AMIGO_DYNAMIC_URL'].value;
 var golr_private_url = a['AMIGO_PRIVATE_GOLR_URL'].value;
 var golr_public_url = a['AMIGO_PUBLIC_GOLR_URL'].value;
@@ -181,13 +186,15 @@ var all_owltools_ops_flags_list = [
     (otu_mrg_imp_p ? '--merge-import http://purl.obolibrary.org/obo/go/extensions/go-plus.owl' : '' ),
     '--remove-subset-entities upperlevel',
     (otu_rm_dis_p ? '--remove-disjoints' : ''),
-    '--silence-elk --reasoner elk'
+    '--silence-elk --reasoner elk',
+    '--solr-taxon-subset-name amigo_grouping_subset',
+    '--solr-eco-subset-name go_groupings'
 ];
 var owltools_ops_flags =
 	all_owltools_ops_flags_list.join(' ').replace(/ +/g, ' ');
 
 // Verbosity.
-console.log('AmiGO version: ' + amigo_version);
+//console.log('AmiGO version: ' + amigo_version);
 console.log('AmiGO location: ' + amigo_url);
 console.log('GOlr (private loading) location: ' + golr_private_url);
 console.log('OWLTools invocation: ' +
@@ -239,7 +246,7 @@ gulp.task('test-app', shell.task(_run_cmd_list(
 ///
 
 gulp.task('docs', shell.task(_run_cmd_list(
-    ['naturaldocs --rebuild-output --input ./javascript/lib/amigo --project javascript/docs/.naturaldocs_project/ --output html javascript/docs',
+    [//'naturaldocs --rebuild-output --input ./javascript/lib/amigo --project javascript/docs/.naturaldocs_project/ --output html javascript/docs',
      'naturaldocs --rebuild-output --input ./perl/lib/ --project perl/docs/.naturaldocs_project/ --output html perl/docs']
 )));
 
@@ -247,25 +254,87 @@ gulp.task('docs', shell.task(_run_cmd_list(
 /// AmiGO install.
 ///
 
-gulp.task('install', shell.task(_run_cmd_list(
-    ['./node_modules/.bin/browserify javascript/web/AmiGOCytoViewSource.js -o javascript/web/AmiGOCytoView.js --exclude "ringo/httpclient"',
-    './node_modules/.bin/browserify javascript/web/AmiGOBioViewSource.js -o javascript/web/AmiGOBioView.js --exclude "ringo/httpclient"',
-    './install -v -g -V ' + amigo_version]
-)));
+gulp.task('install', ['compile', 'build']);
 
-gulp.task('install-uncompressed', shell.task(_run_cmd_list(
-    ['./node_modules/.bin/browserify javascript/web/AmiGOCytoViewSource.js -o javascript/web/AmiGOCytoView.js --exclude "ringo/httpclient"',
-    './node_modules/.bin/browserify javascript/web/AmiGOBioViewSource.js -o javascript/web/AmiGOBioView.js --exclude "ringo/httpclient"',
-     './install -v -g -u -V ' + amigo_version]
-)));
+// TODO/BUG: This should eventually be replaced by a read of
+// javascript/web. For now, we'll just have this so we can work our
+// way through the garage fixing things at our leisure.
+var web_compilables = [
+    // 'DDBrowse.js', // current working set
+    // 'Matrix.js'    // current working set
+    // 'LiveSearchGOlr.js'    // current working set
+    // 'Browse.js'    // current working set
+    'AmiGOBioView.js',
+    'AmiGOCytoView.js',
+    'BaseStatistics.js',
+    'Browse.js',
+    'BulkSearch.js',
+    'DDBrowse.js',
+    'FacetMatrix.js',
+    'GeneralSearchForwarding.js',
+    'Gannet.js',
+    'GOOSE.js',
+    'GPDetails.js',
+    'Grebe.js',
+    'Matrix.js',
+    'Medial.js',
+    'LandingGraphs.js',
+    'LiveSearchGOlr.js',
+    'LoadDetails.js',
+    'Schema.js',
+    'TermDetails.js'
+];
 
-// Create exportable JS bundle. Only captures the statistics data if
-// it has been generated separately.
-gulp.task('bundle', shell.task(_run_cmd_list(
-    ['./install -b -V ' + amigo_version]
-)));
-gulp.task('bundle-uncompressed', shell.task(_run_cmd_list(
-    ['./install -b -u -V ' + amigo_version]
+// See what browserify-shim is up to.
+//process.env.BROWSERIFYSHIM_DIAGNOSTICS = 1;
+// Browser runtime environment construction.
+function _client_compile_task(file) {
+
+    var infile = amigo_js_dev_path + '/' +file;
+    //var outfile = amigo_js_out_path + '/' +file;
+
+    var b = browserify(infile);
+    return b
+    // not in npm, don't need in browser
+	.exclude('ringo/httpclient')
+	.bundle()
+    // desired output filename to vinyl-source-stream
+	.pipe(source(file))
+	.pipe(gulp.dest(amigo_js_out_path));
+}
+
+// Compile all JS used in AmiGO and move it to the staging/deployment
+// directory.
+gulp.task('compile', ['build'], function(cb){
+    us.each(web_compilables, function(file){
+	_client_compile_task(file);
+    });
+    cb(null);
+});
+
+// A version of compile that does not care about build--for rapid JS
+// development.
+gulp.task('compile-js-dev', function(cb){
+    us.each(web_compilables, function(file){
+	_client_compile_task(file);
+    });
+    cb(null);
+});
+
+// Correctly build/deploy/roll out files into working AmiGO
+// configuration.
+gulp.task('build', shell.task(_run_cmd_list(
+	// First, make sure our subservient amigo2 package has what it
+	// needs to run at all.
+	[
+	    'cd ./javascript/npm/amigo2-instance-data && npm install',
+	    './install -v'
+	]
+    ))
+);
+
+gulp.task('cache', shell.task(_run_cmd_list(
+    ['node ./scripts/amigo-create-base-stats-cache.js']
 )));
 
 ///
@@ -416,12 +485,14 @@ gulp.task('clean-load-log', shell.task(_run_cmd_list(
 /// Development.
 ///
 
-// // Rerun tasks when a file changes.
-// gulp.task('watch', function(cb) {
-//   gulp.watch(paths.clients, ['build']);
-//   gulp.watch(paths.support, ['build']);
-//   cb(null);
-// });
+// Rerun tasks when a file changes.
+gulp.task('watch-js', function(cb) {
+    //gulp.watch(web_compilables, ['compile-js-dev']);
+    gulp.watch(us.map(web_compilables,
+		      function(file){ return amigo_js_dev_path + '/'+file; } ),
+	       ['compile-js-dev']);
+    cb(null);
+});
 
 // Clean out stuff. There needs to be a "-x" to actually run.
 gulp.task('clean-filesystem', shell.task(_run_cmd_list(
@@ -438,32 +509,25 @@ gulp.task('w3c-validate', shell.task(_run_cmd_list(
     ['./scripts/w3c-validate.pl -v --html']
 )));
 
-// Run the local-only/embedded testing server.
-gulp.task('run-amigo', shell.task(_run_cmd_list(
-    ['perl -I./perl/bin/ -I./perl/lib/ scripts/amigo-runner']
-)));
-
 ///
-/// Publishing.
+/// Versioning and publishing.
 ///
 
-gulp.task('assemble-npm', shell.task(_run_cmd_list(
-    ['./scripts/release-npm.pl -v -i ./javascript/staging/amigo2.js -o javascript/npm/amigo2 -r ' + amigo_version]
-)));
+// Release tools for patch release.
+gulp.task('release', ['install', // compile and roll out files and js templates
+		      'publish-npm', // put to 
+		      'patch-bump', // bump the main amigo
+		      'sync-package-version']); // bump the subordinates
 
-gulp.task('publish-npm', shell.task(_run_cmd_list(
-    ['npm publish javascript/npm/amigo2']
-)));
-
-// TODO: This version will have to wait until the app and lib are unified.
-// gulp.task('publish-npm', function(cb) {
-//   var npm = require("npm");
-//   npm.load(function(er, npm) {
-//     // NPM
-//     npm.commands.publish();
-//   });
-//   cb(null);
-// });
+// TODO
+gulp.task('publish-npm', function(cb) {
+    var npm = require("npm");
+    npm.load(function(er, npm) {
+	// NPM
+	//    npm.commands.publish();
+    });
+    cb(null);
+});
 
 gulp.task('patch-bump', function(cb) {
     gulp.src('./package.json')
@@ -474,8 +538,24 @@ gulp.task('patch-bump', function(cb) {
     cb(null);
 });
 
-// Release tools for patch release.
-gulp.task('release', ['bundle', 'assemble-npm', 'publish-npm', 'patch-bump']);
+// Make sure that the instance data takes the same version as the
+// install.
+gulp.task('sync-package-version', function(cb) {
+
+    var a_ver = require('./package.json').version;
+
+    var to_sync = ['./javascript/npm/amigo2-instance-data/',
+		   './javascript/npm/bbop-widget-set/'];
+
+    us.each(to_sync, function(pkg_path){
+	gulp.src(pkg_path + 'package.json')
+	    .pipe(bump({
+		version: a_ver
+	    }))
+	    .pipe(gulp.dest(pkg_path));
+    });
+    cb(null);
+});
 
 ///
 /// DEBUG.
@@ -487,12 +567,14 @@ gulp.task('buffer-check', shell.task(_run_cmd_list(
     ['perl -e "for (0..1500000){ print STDOUT \\"0123456789\\n\\";}"'] // okay
 )));
 
-//
-/// Default.
+///
+/// Runner.
 ///
 
-// The default task (called when you run `gulp` from cli)
-gulp.task('default', ['install', 'tests', 'docs']);
+// Run the local-only/embedded testing server.
+gulp.task('run-amigo', shell.task(_run_cmd_list(
+    ['perl -I./perl/bin/ -I./perl/lib/ scripts/amigo-runner']
+)));
 
 ///
 /// Trying out possible approach to AmiGO JSON API.
@@ -529,6 +611,13 @@ gulp.task('develop-amigo-api', function(){
 	server_restarter.restart();
     });
 });
+
+///
+/// Default.
+///
+
+// The default task (called when you run `gulp` from cli)
+gulp.task('default', ['install', 'tests', 'docs']);
 
 ///
 /// Old Makefile that has not yet been transferred.

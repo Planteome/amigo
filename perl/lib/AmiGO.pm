@@ -38,6 +38,7 @@ use URI::Escape;
 #use JSON;
 #use JSON::PP;
 use JSON::XS;
+use File::Slurp;
 use Data::UUID;
 use List::Util 'shuffle';
 
@@ -587,71 +588,6 @@ sub kvetch {
 }
 
 
-# ###
-# ### Pre-rendering.
-# ###
-
-
-# =item url_pre_render
-
-# Args: string of filename
-# Decides whether or not a file a page has been pre-rendered.
-# Returns undef or url.
-
-# =cut
-# sub url_pre_render {
-
-#   my $self = shift;
-#   my $fname = shift;
-#   my $ret_url = undef;
-
-#   my $file_back_half = '/' . $fname;
-#   my $complete_file_pr_url =
-#     $self->amigo_env('AMIGO_PRE_RENDER_URL') . $file_back_half;
-#   my $complete_file_pr_file =
-#     $self->amigo_env('AMIGO_PRE_RENDER_DIR') . $file_back_half;
-
-#   if( -f $complete_file_pr_file ){
-#     $ret_url = $complete_file_pr_url;
-#   }
-
-#   return $ret_url;
-# }
-
-
-# =item file_pre_render
-
-# Args: string of filename
-# Decides whether or not a file a page has been pre-rendered.
-# Returns undef or page contents.
-
-# =cut
-# sub file_pre_render {
-
-#   my $self = shift;
-#   my $fname = shift;
-#   my $ret_file = undef;
-
-#   my $file_back_half = '/' . $fname;
-#   my $complete_file_pr_file =
-#     $self->amigo_env('AMIGO_PRE_RENDER_DIR') . $file_back_half;
-
-#   if( -f $complete_file_pr_file ){
-
-#     open(FILE, $complete_file_pr_file)
-#       or die "Cannot open $complete_file_pr_file: $!";
-
-#     my @buf = ();
-#     while (<FILE>) {
-#       push @buf, $_;
-#     }
-#     $ret_file = join '', @buf;
-#   }
-
-#   return $ret_file;
-# }
-
-
 ###
 ### HTTP
 ###
@@ -966,6 +902,7 @@ sub get_interlink {
      'owltools_details' => sub { $ilink = 'amigo/owltools_details'; },
      'browse' => sub { $ilink = 'amigo/browse'; },
      'dd_browse' => sub { $ilink = 'amigo/dd_browse'; },
+     'base_statistics' => sub { $ilink = 'amigo/base_statistics'; },
      'free_browse' => sub { $ilink = 'amigo/free_browse'; },
      'goose' => sub { $ilink = 'goose'; },
      'grebe' => sub { $ilink = 'grebe'; },
@@ -1471,6 +1408,8 @@ sub _read_json_string {
   my $json_str = shift || die 'yes, but what string do you want read?';
 
   #$self->kvetch("JSON contents: " . $json_str);
+  #$| = 1;
+  #print STDOUT "JSON contents|||" . $json_str . '|||';
 
   ## Read in data.
   # $self->kvetch("json: " . $self->{JSON});
@@ -1479,7 +1418,13 @@ sub _read_json_string {
 
   my $rethash = undef;
   # eval {
-  $rethash = $self->{JSON}->decode($json_str);
+  if( $self ){
+      $rethash = $self->{JSON}->decode($json_str);
+  }else{
+      #my $local_json = JSON::XS->new();
+      #$rethash = $local_json->decode($json_str);
+      $rethash = JSON::XS->new->utf8->decode($json_str);
+  }
   # };
   # if( $@ ){
   # die "nope: $@: $!";
@@ -1498,12 +1443,20 @@ sub _read_json_file {
 
   ## Try and get it.
   die "No hash file found ($file): $!" if ! -f $file;
-  open(FILE, '<', $file) or die "Cannot open $file: $!";
-  my $json_str = <FILE>;
-  close FILE;
+  # open(FILE, '<', $file) or die "Cannot open $file: $!";
+  # my $json_str = <FILE>;
+  # close FILE;
+  my $json_str = read_file($file);
 
   ## Punt to string reader.
-  return $self->_read_json_string($json_str);
+  my $retval = undef;
+  if( $self ){
+      $retval = $self->_read_json_string($json_str);
+  }else{
+      $retval = _read_json_string(undef, $json_str);
+  }
+
+  return $retval;
 }
 
 
@@ -1571,7 +1524,7 @@ sub golr_configuration {
 
   my $self = shift;
   my $json_file = $self->amigo_env('AMIGO_ROOT') .
-    '/javascript/lib/amigo/data/golr.js';
+    '/javascript/npm/amigo2-instance-data/lib/data/golr.js';
 
   ## Try and get the string out.
   ## Crop to just the parts that are interesting.
@@ -1580,7 +1533,7 @@ sub golr_configuration {
   my $read_buffer = [];
   my $read_p = 0;
   while( <FILE> ){
-    if( /amigo.data.golr\ \=\ \{/ ){
+    if( /var golr\ \=\ \{/ ){
       $read_p = 1;
       push @$read_buffer, '{';
     }elsif( /^\}\;/ ){
@@ -1787,6 +1740,32 @@ sub golr_class_weights {
   return $rethash;
 }
 
+###
+###
+###
+
+=item amigo_statistics_cache
+
+Return href of the statistics cache, if found.
+Empty otherwise.
+
+=cut
+sub amigo_statistics_cache {
+
+  my $self = shift;
+  my $ret = {};
+
+  my $json_file = $self->amigo_env('AMIGO_ROOT') .
+    '/perl/bin/amigo-base-statistics-cache.json';
+
+  ## Try and get the string out.
+  ## Crop to just the parts that are interesting.
+  if( -f $json_file ){
+    $ret = $self->_read_json_file($json_file);
+  }
+
+  return $ret;
+}
 
 ###
 ### Public bookmark API.
@@ -1823,6 +1802,34 @@ sub bookmark_api_configuration {
 ### Misc.
 ###
 
+=item get_root_terms
+
+Arguments: n/a
+
+Return: an ordered aref of id/value and label/value hashref pairs.
+
+=cut
+sub get_root_terms {
+
+  my $self = shift;
+
+  my $retlist = [];
+
+  ## 
+  my $str_raw = $self->amigo_env('AMIGO_ROOT_TERMS') || '';
+  if( $str_raw ){
+      my $root_set = $self->_read_json_string($str_raw);
+      foreach my $try_root (@$root_set){
+	  if( $try_root->{'id'} && $try_root->{'label'} ){
+	      push @$retlist, $try_root;
+	  }
+      }
+  }
+
+  return $retlist;
+}
+
+
 =item get_amigo_layout
 
 Arguments: the AMIGO_LAYOUT_* variable that contains a list of GOlr classes
@@ -1842,6 +1849,7 @@ sub get_amigo_layout {
   my $clist = $self->clean_list($str_raw);
   foreach my $citem (@$clist){
     my $try_class = $self->golr_class_info($citem);
+    #$self->kvetch('layout entry: ' . $citem . ', ' . $try_class);
     if( $try_class ){
       push @$retlist, $try_class;
     }
@@ -2294,12 +2302,15 @@ sub dynamic_dispatch_table_amigo {
      'schema_details'      => { app => $aapp, rm => 'schema_details' },
      'load_details'        => { app => $aapp, rm => 'load_details' },
      'owltools_details'    => { app => $aapp, rm => 'owltools_details' },
-     'browse'              => { app => $aapp, rm => 'browse' },
      'dd_browse'           => { app => $aapp, rm => 'dd_browse' },
+     'base_statistics'     => { app => $aapp, rm => 'base_statistics' },
      'free_browse'         => { app => $aapp, rm => 'free_browse' },
      ##
      ## Soft applications (may take some parameters, browser-only).
      ##
+     'browse/:term?'       => { app => $aapp, rm => 'specific_browse',
+				'term' => 'term' },
+     'browse'              => { app => $aapp, rm => 'browse'},
      'medial_search'       => { app => $aapp, rm => 'medial_search' },
      'simple_search'       => { app => $aapp, rm => 'simple_search' },
      'bulk_search/:personality' => { app => $aapp, rm => 'bulk_search',

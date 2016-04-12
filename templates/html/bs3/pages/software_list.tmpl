@@ -33,9 +33,9 @@
   </li>
   
   <li class="list-group-item">
-    <a href="[% interlink_grebe %]" title="Grebe Search Wizard">Search
-      Wizard</a> (Grebe) can be used to quickly answer common
-    questions using a fill-in-the-blank approach.
+    <a href="[% interlink_grebe %]" title="Search Templates">Search
+      templates</a> (a search "wizard") can be used to quickly answer
+      common questions using a fill-in-the-blank approach.
   </li>
 
   <li class="list-group-item">
@@ -46,6 +46,18 @@
     more <a href="http://wiki.geneontology.org/index.php/AmiGO_2_Manual:_Visualize">details</a>.
   </li>
     
+  <li class="list-group-item">
+    <a href="[% interlink_dd_browse %]">
+       Drill-down browser</a> can be used to explore the ontologies
+      and annotation from the top levels by opening direct descendant
+      terms individually to create a custom view.
+  </li>
+  
+  <li class="list-group-item">
+    <a href="[% interlink_base_statistics %]">Base statistics</a> can give a
+    high-level view of what kind of data is available in AmiGO.
+  </li>
+  
   <li class="list-group-item">
     <strong>Medial search</strong> returns match counts for the
     different search personalities and allows users to select which
@@ -88,7 +100,7 @@
 <ul class="list-group">
 
   <li class="list-group-item">
-    <a href="[% interlink_rte %]">Term Enrichment Services</a> offers
+    <a href="[% interlink_rte %]">Term enrichment services</a> offers
     access to term enrichment analysis, finding significant shared GO
     terms or parents of those GO terms to help discover what input
     genes may have in common.
@@ -96,7 +108,7 @@
   
   <li class="list-group-item">
     <a href="[% public_1x_base %]/term_enrichment"
-       title="">Term Enrichment</a>
+       title="">Term enrichment</a>
     <span class="label label-default">AmiGO 1.8</span>
     finds significant shared GO terms
     or parents of those GO terms, used to describe the genes in the
@@ -106,7 +118,7 @@
    
   <li class="list-group-item">
     <a href="[% public_1x_base %]/slimmer"
-       title="">GO Slimmer</a>
+       title="">GO slimmer</a>
     <span class="label label-default">AmiGO 1.8</span>
     allows you to map the granular
     annotations of the query set of genes to one or more
@@ -123,6 +135,10 @@
     input sequence.
   </li>
 
+  <li class="list-group-item">
+    <a href="[% base %]/matrix">Term matrix</a> for exploring gene product (bioentity) co-annotation information.
+  </li>
+  
 </ul>
 
 <h2>Directly query GO data</h2>      
@@ -136,6 +152,14 @@
     is the GO Online SQL Environment. Using this, users may query the
     a GO SQL database directly using SQL, or edit one of the already
     made templates.
+  </li>
+  
+  <!-- http://gannet.berkeleybop.org -->
+  <li class="list-group-item">
+    <a href="[% interlink_gannet %]" title="Gannet: query the SOlr index directly">Gannet</a> is the Solr analog to GOOSE.
+    <!-- This page can -->
+    <!-- interact with the <a title="GO Galaxy" href="[% GO_GALAXY %]">GO -->
+    <!--   Galaxy</a> instance. Also see the <a href="[% interlink_schema_details %]" title="Instance schema details">schema details</a>. -->
   </li>
   
 </ul>
@@ -163,11 +187,6 @@
     cross-references currently understood by AmiGO.
   </li>
   
-  <!-- This page may be useful in -->
-  <!-- conjunction with -->
-  <!-- <a href="[% interlink_gannet %]" -->
-  <!-- 	 title="Gannet: query the SOlr index directly">Gannet</a>. -->
-  
 </ul>
 
 <h2>Pages for non-JavaScript users and spiders</h2>
@@ -178,20 +197,16 @@
       For users unable to use JavaScript and spiders, the root GO
       terms can be found here.
     </p>
+    <!-- <ul class="list-unstyled"> -->
     <ul class="list-inline">
-      <!-- <ul class="list-unstyled"> -->
+      [% FOREACH root_pair = root_terms %]
+      [%   root_id = root_pair.id %]
+      [%   root_label = root_pair.label %]
       <li>
-	<a href="[% interlink_term_details_base %]/GO:0008150"
-	   title="Jump to biological_process">Biological process</a>
+	<a href="[% interlink_term_details_base %]/[% root_id %]"
+	   title="Jump to [% root_label %]">[% root_label %]</a>
       </li>
-      <li>
-	<a href="[% interlink_term_details_base %]/GO:0005575"
-	   title="Jump to cellur_component">Cellular component</a>
-      </li>
-      <li>
-	<a href="[% interlink_term_details_base %]/GO:0003674"
-	   title="Jump to molecular_function">Molecular function</a>
-      </li>
+      [% END %]
     </ul>
   </li>
 
@@ -232,19 +247,9 @@
   
   <li class="list-group-item">
     <a href="[% interlink_browse %]">Browse</a> the Gene Ontology
-    term data in an interactive hierarchical form.
-  </li>
-  
-  <li class="list-group-item">
-    <a href="[% interlink_dd_browse %]">Drill-down browser</a> can be used to
-    grossly explore the ontologies from the given top levels.
-  </li>
-  
-  <!-- http://gannet.berkeleybop.org -->
-  <li class="list-group-item">
-    <a href="[% interlink_gannet %]" title="Gannet: query the SOlr index directly">Gannet</a> is the Solr analog to GOOSE. This page can
-    interact with the <a title="GO Galaxy" href="[% GO_GALAXY %]">GO
-      Galaxy</a> instance. Also see the <a href="[% interlink_schema_details %]" title="Instance schema details">schema details</a>.
+    term data in an interactive hierarchical form. Either from the
+    <a href="[% interlink_browse %]">roots</a> or from a
+    <a href="[% interlink_browse %]/GO:0022008">specific term</a>.
   </li>
   
   <li class="list-group-item">
@@ -259,6 +264,10 @@
     more <a href="http://wiki.geneontology.org/index.php/AmiGO_2_Manual:_Visualize_Freeform">information</a>.
   </li>
     
+  <li class="list-group-item">
+    <a href="[% base %]/amigo/biology">All models</a> in the fold.
+  </li>
+  
 </ul>
   
 <h2>AmiGO 2 Software in the Garage</h2>
@@ -270,15 +279,6 @@
   
   <li class="list-group-item">
     <a href="[% interlink_free_browse %]">Experimental graph browser</a> using cytoscape.js.
-  </li>
-  
-  <li class="list-group-item">
-    <a href="[% base %]/matrix">Matrix</a> showing shared
-    association information.
-  </li>
-  
-  <li class="list-group-item">
-    <a href="[% base %]/amigo/biology">All models</a> in the fold.
   </li>
   
   <li class="list-group-item">
@@ -314,11 +314,11 @@
   <!--   <a href="[% base %]/amigo_exp?mode=ntree">Phylogenic Tree</a> browser in JavaScript. -->
   <!-- </p> -->
   
-  <li class="list-group-item">
-    <strike><a href="[% base %]/amigo_exp?mode=drill">Drill Down</a>
-    experimental tree browser using a jQuery plugin. Not too smart,
-    but lightweight.</strike>
-  </li>
+  <!-- <li class="list-group-item"> -->
+  <!--   <strike><a href="[% base %]/amigo_exp?mode=drill">Drill Down</a> -->
+  <!--   experimental tree browser using a jQuery plugin. Not too smart, -->
+  <!--   but lightweight.</strike> -->
+  <!-- </li> -->
   
   <li class="list-group-item">
     <strike><a href="[% base %]/amigo_exp?mode=visic">Visual IC</a>
