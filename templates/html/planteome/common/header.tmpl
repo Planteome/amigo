@@ -14,7 +14,8 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="amigo-logo-img-link" href="/"><img class="amigo-logo-img" src="[% image_dir %]/Planteome-logo.png" alt="Planteome logo" title="Planteome front page"></a>
+      <a class="amigo-logo-img-link" href="/"><img class="amigo-logo-img" src="[% image_dir %]/Planteome-logo.png" alt="Planteome logo" title="Planteome ontology browser"></a>
+<!--      <a class="navbar-brand" href="[% base %]/amigo/landing">AmiGO 2</a> -->
     </div>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -43,7 +44,7 @@
         </li>
 
 	<!-- Browse. -->
-        <!-- <li[% IF page_name == 'browse' %] class="active"[% END %]><a href="[% interlink_browse %]" title="Browse GO terms.">Browse</a></li> -->
+         <li[% IF page_name == 'dd_browse' %] class="active"[% END %]><a href="[% interlink_dd_browse %]" title="Browse ontology terms and view annotation counts.">Browse</a></li>
 
 	<!-- Software list. -->
         <li[% IF page_name == 'software_list' %] class="active"[% END %]><a href="[% interlink_tools %]" title="More tools to explore the Gene Ontology">Tools&nbsp;&amp;&nbsp;Resources</a></li>

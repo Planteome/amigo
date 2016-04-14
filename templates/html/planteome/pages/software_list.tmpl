@@ -34,6 +34,13 @@
   
 
   <li class="list-group-item">
+   <a href="[% interlink_dd_browse %]">
+       Drill-down browser</a> can be used to explore the ontologies
+      and annotation from the top levels by opening direct descendant
+      terms individually to create a custom view.
+  </li>
+  
+  <li class="list-group-item"> 
     <a href="[% interlink_visualize_client_amigo %]">Visualization</a>
     creator for graphs. Freely make
     your own ontology graph, including label and color
@@ -41,6 +48,11 @@
     more <a href="http://wiki.geneontology.org/index.php/AmiGO_2_Manual:_Visualize">details</a>.
   </li>
     
+  <li class="list-group-item">
+    <a href="[% interlink_base_statistics %]">Base statistics</a> can give a
+    high-level view of what kind of data is available in AmiGO.
+  </li>
+  
   <li class="list-group-item">
     <strong>Medial search</strong> returns match counts for the
     different search personalities and allows users to select which
@@ -102,10 +114,6 @@
     cross-references currently understood by AmiGO.
   </li>
   
-  <!-- This page may be useful in -->
-  <!-- conjunction with -->
-  <!-- <a href="[% interlink_gannet %]" -->
-  <!-- 	 title="Gannet: query the SOlr index directly">Gannet</a>. -->
   
 </ul>
 
@@ -117,10 +125,16 @@
       For users unable to use JavaScript and spiders, the root Planteome
       terms can be found here.
     </p>
+    
+    <!-- <ul class="list-unstyled"> -->
     <ul class="list-inline">
-      <!-- <ul class="list-unstyled"> -->
+      [% FOREACH root_pair = root_terms %]
+      [%   root_id = root_pair.id %]
+      [%   root_label = root_pair.label %]
       <li>
-	<a href="[% interlink_term_details_base %]/GO:0008150"
+	<a href="[% interlink_term_details_base %]/[% root_id %]"
+	   title="Jump to [% root_label %]">[% root_label %]</a>
+<!--	<a href="[% interlink_term_details_base %]/GO:0008150"
 	   title="Jump to biological_process">Biological process</a>
       </li>
       <li>
@@ -146,7 +160,10 @@
       <li>
 	<a href="[% interlink_term_details_base %]/EO:0007359"
 	   title="Jump to plant experimental condition">Plant experimental condition</a>
-      </li>
+
+-->      
+	</li>
+	[% END %]
     </ul>
   </li>
 
@@ -187,19 +204,17 @@
   
   <li class="list-group-item">
     <a href="[% interlink_browse %]">Browse</a> the Gene Ontology
-    term data in an interactive hierarchical form.
-  </li>
-  
-  <li class="list-group-item">
-    <a href="[% interlink_dd_browse %]">Drill-down browser</a> can be used to
-    grossly explore the ontologies from the given top levels.
+    term data in an interactive hierarchical form. Either from the
+    <a href="[% interlink_browse %]">roots</a> or from a
+    <a href="[% interlink_browse %]/GO:0022008">specific term</a>.
   </li>
   
   <!-- http://gannet.berkeleybop.org -->
   <li class="list-group-item">
-    <a href="[% interlink_gannet %]" title="Gannet: query the SOlr index directly">Gannet</a> is the Solr analog to GOOSE. This page can
-    interact with the <a title="GO Galaxy" href="[% GO_GALAXY %]">GO
-      Galaxy</a> instance. Also see the <a href="[% interlink_schema_details %]" title="Instance schema details">schema details</a>.
+    <a href="[% interlink_gannet %]" title="Gannet: query the SOlr index directly">Gannet</a> is the Solr analog to GOOSE.
+    <!--This page can -->
+    <!-- interact with the <a title="GO Galaxy" href="[% GO_GALAXY %]">GO -->
+    <!--  Galaxy</a> instance. Also see the <a href="[% interlink_schema_details %]" title="Instance schema details">schema details</a>. -->
   </li>
   
   <li class="list-group-item">
@@ -213,6 +228,11 @@
     changes. Please see the documentation for
     more <a href="http://wiki.geneontology.org/index.php/AmiGO_2_Manual:_Visualize_Freeform">information</a>.
   </li>
+
+  <li class="list-group-item">
+    <a href="[% base %]/amigo/biology">All models</a> in the fold.
+  </li>
+  
     
 </ul>
   
@@ -227,10 +247,6 @@
     <a href="[% interlink_free_browse %]">Experimental graph browser</a> using cytoscape.js.
   </li>
   
-  <li class="list-group-item">
-    <a href="[% base %]/matrix">Matrix</a> showing shared
-    association information.
-  </li>
   
   <li class="list-group-item">
     <strike><a href="[% base %]/pgraph">Phylotree/Graph</a> test using
