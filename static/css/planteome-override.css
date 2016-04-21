@@ -26,6 +26,15 @@ color: '#4e5679';
   border-color: #222222;
   font-size: 20px;
 }
+.alert-warning {
+  color: #000000;
+  background-color: #afcfef;
+  border-color: #222222;
+  font-size: 20px;
+}
+.alert-warning .alert-link {
+  color: #000000;
+}
 /* Information bar */
 .panel-default>.panel-heading {
   color: #333;
