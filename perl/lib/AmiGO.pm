@@ -924,6 +924,16 @@ sub get_interlink {
        $ilink = 'amigo/gene_product/' . $gp;
      },
 
+     'reference_details' =>
+     sub {
+	 die "interlink mode 'reference_details' requires args"
+	     if ! defined $args;
+	 die "interlink mode 'reference_details' requires ref arg"
+	     if ! defined $args->{'ref'};
+	 my $rid = $args->{'ref'} || '';
+	 $ilink = 'amigo/reference/' . $rid;
+     },
+
      'model_details' =>
      sub {
        die "interlink mode 'model_details' requires args" if ! defined $args;
@@ -1126,6 +1136,19 @@ sub get_interlink {
 	 $ilink = 'amigo/medial_search?q='. $query;
        }else{
 	 $ilink = 'amigo/medial_search';
+       }
+       # }else{
+       # 	 die "The medial_search system requires a query argument.";
+       # }
+     },
+
+     'reference_search' =>
+     sub {
+       my $query = $args->{ref_id} || '';
+       if( $query ){
+	 $ilink = 'amigo/reference?q='. $query;
+       }else{
+	 $ilink = 'amigo/reference';
        }
        # }else{
        # 	 die "The medial_search system requires a query argument.";
@@ -2325,13 +2348,17 @@ sub dynamic_dispatch_table_amigo {
      ##
      ## RESTy (can be consumed as service).
      ##
-     'term/:cls/:format?'       => { app => $aapp, rm => 'term',
-				     'cls' => 'cls', 'format' => 'format' },
-     'gene_product/:gp/:format?' => { app => $aapp, rm => 'gene_product',
-				      'gp' => 'gp', 'format' => 'format' },
+     'term/:cls/:format?'         => { app => $aapp, rm => 'term',
+				       'cls' => 'cls', 'format' => 'format' },
+     'gene_product/:gp/:format?'  => { app => $aapp, rm => 'gene_product',
+				       'gp' => 'gp', 'format' => 'format' },
+     'reference/:ref_id/:format?' => { app => $aapp, rm => 'reference',
+				       'ref_id'=>'ref_id', 'format'=>'format' },
+     'reference' => { app => $aapp, rm => 'reference'},
      ## Alpha.
      'model/:model'  => { app => $aapp, rm => 'model', model => 'model' },
      'biology'  => { app => $aapp, rm => 'biology' },
+     'ontologies'  => { app => $aapp, rm => 'ontologies' },
     ];
 
   return $dispatch_table;

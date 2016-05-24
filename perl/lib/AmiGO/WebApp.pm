@@ -928,6 +928,8 @@ sub _common_params_settings {
     $self->{CORE}->get_interlink({mode=>'base_statistics'});
   $params->{interlink_free_browse} =
     $self->{CORE}->get_interlink({mode=>'free_browse'});
+  $params->{interlink_reference_search} =
+    $self->{CORE}->get_interlink({mode=>'reference_search'});
   $params->{interlink_medial_search} =
     $self->{CORE}->get_interlink({mode=>'medial_search'});
   $params->{interlink_simple_search} =
@@ -990,6 +992,8 @@ sub _common_params_settings {
   $params->{version} = $self->{CORE}->amigo_env('AMIGO_VERSION');
   my $sid = $params->{session_id} || '';
   $params->{session_id_for_url} = 'session_id=' . $sid;
+  $params->{download_limit} =
+    $self->{CORE}->amigo_env('AMIGO_DOWNLOAD_LIMIT') || 100000;
   $params->{server_name} =
     $self->{CORE}->amigo_env('AMIGO_SERVER_NAME') || '';
   ## Filters and the like.
@@ -1430,17 +1434,11 @@ sub mode_status {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();'
      ],
      content =>
      [
@@ -1512,17 +1510,11 @@ sub mode_fatal {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();'
      ],
      content =>
      [
@@ -1580,17 +1572,11 @@ sub mode_not_found {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();'
      ],
      content =>
      [
@@ -1652,17 +1638,11 @@ sub mode_generic_message {
      [
       'com.jquery',
       'com.bootstrap',
-      'com.jquery-ui',
-      'bbop',
-      'amigo'
+      'com.jquery-ui'
      ],
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
-     ],
-     javascript_init =>
-     [
-      'GeneralSearchForwardingInit();'
      ],
      content =>
      [

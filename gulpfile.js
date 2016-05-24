@@ -265,8 +265,11 @@ var web_compilables = [
     // 'LiveSearchGOlr.js'    // current working set
     // 'Browse.js'    // current working set
     // 'FreeBrowse.js'    // current working set
+    // 'ReferenceDetails.js'    // current working set
+    // 'AmiGOOntView.js'    // current working set
     'AmiGOBioView.js',
     'AmiGOCytoView.js',
+    'AmiGOOntView.js',
     'BaseStatistics.js',
     'Browse.js',
     'BulkSearch.js',
@@ -282,6 +285,7 @@ var web_compilables = [
     'LandingGraphs.js',
     'LiveSearchGOlr.js',
     'LoadDetails.js',
+    'ReferenceDetails.js',
     'Schema.js',
     'TermDetails.js'
 ];
@@ -587,7 +591,6 @@ if( process && process.env && process.env['GOLR_URL'] ){
     amigo_api_golr = process.env['GOLR_URL'];
 }
 
-var exp_cmd = 'node ./bin/amigo.js -g ' + amigo_api_golr + ' -p 6455';
 gulp.task('run-amigo-api', shell.task(_run_cmd([
     'node', './bin/amigo.js',
     '-g', amigo_api_golr,

@@ -73,8 +73,10 @@ sub setup {
 		   'free_browse'         => 'mode_free_browse',
 		   'term'                => 'mode_term_details',
 		   'gene_product'        => 'mode_gene_product_details',
+		   'reference'           => 'mode_reference_details',
 		   'model'               => 'mode_model_details',
 		   'biology'             => 'mode_model_biology',
+		   'ontologies'          => 'mode_ontologies',
 		   'software_list'       => 'mode_software_list',
 		   'schema_details'      => 'mode_schema_details',
 		   'load_details'        => 'mode_load_details',
@@ -113,7 +115,7 @@ sub _add_search_bookmark_api_to_filters {
 
 	    foreach my $item (@$items){
 		my $map_to = $bmapi->{$entry};
-		
+
 		## Check to see if it is a negative call or not.
 		my $created_filter = undef;
 		my $possible_neg = substr($item, 0, 1);
@@ -1842,6 +1844,148 @@ sub mode_gene_product_details {
 }
 
 
+## 
+sub mode_reference_details {
+
+  my $self = shift;
+
+  ##
+  my $i = AmiGO::Input->new($self->query());
+  my $params = $i->input_profile('reference');
+  ## Deal with the different types of dispatch we might be facing.
+  $params->{ref_id} = $self->param('ref_id')
+    if ! $params->{ref_id} && $self->param('ref_id');
+  $params->{format} = $self->param('format')
+    if ! $params->{format} && $self->param('format');
+  $self->{CORE}->kvetch(Dumper($params));
+
+  ## Standard inputs for page control.
+  my $input_ref_id = $params->{ref_id};
+  my $input_format = $params->{format} || 'html';
+
+  ## Optional RESTmark input for embedded search_pane.
+  my $query = $params->{q} || '';
+  my $filters = $params->{fq} || [];
+  my $pins = $params->{sfq} || [];
+  ## Ensure listref input on multi-inputs.
+  $pins = [$pins] if ref($pins) ne 'ARRAY';
+  $filters = [$filters] if ref($filters) ne 'ARRAY';
+
+  ## Now add the filters that come in from the YAML-defined simple
+  ## public bookmarking API.
+  $filters = $self->_add_search_bookmark_api_to_filters($params, $filters);
+
+  ## Input sanity check.
+  if( $input_ref_id =~ /^pmid\:[0-9]{1,100}/ ){
+    return $self->mode_fatal("Please use a PubMed ID of the form: <b>PMID:123456</b>.");
+  }elsif( $input_ref_id !~ /^PMID\:[0-9]{1,100}/ ){
+
+    ## Warning: this is essientially, except for the action, copied
+    ## out of reference_details.tmpl. Make sure they stay in sync.
+    my $form =
+      [
+       '<form action="/amigo/reference"',
+       'id="reference-query-form"',
+       'class="form-inline"',
+       'role="search"',
+       'method="GET">',
+       '<div class="form-group">',
+       '<input',
+       'type="text"',
+       'title="Input any PubMed ID (e.g. PMID:123456)."',
+       'class="form-control"',
+       'name="ref_id"',
+       'placeholder="E.g. PMID:123456"',
+       'value=""',
+       'id="reference-search-query">',
+       '</div>',
+       '<button type="submit"',
+       'title="Search for groups of documents with the inputted text."',
+       'class="btn btn-default">Search</button>',
+       '</form>'
+      ];
+
+    return $self->mode_fatal("Your input is not a PubMed ID. Please try again:<br /><br />" . join(' ', @$form));
+  }
+  if( ! $input_ref_id ){
+    return $self->mode_fatal("No input reference identifier argument.");
+  }
+  if( $input_format ne 'html' && $input_format ne 'json' ){
+    return $self->mode_fatal('Bad output format: needs to be "html" or "json".');
+  }
+
+  $self->set_template_parameter('REF_ID', $input_ref_id);
+
+  ## TODO/BUG: Should this be a separate client?
+  if( $input_format eq 'json' ){
+    $self->header_add( -type => 'application/json' );
+    my $json_resp = AmiGO::JSON->new('reference');
+    # $json_resp->set_results($gp_info_hash->{$input_ref_id});
+    my $jdump = $json_resp->render();
+    return $jdump;
+  }
+
+  ###
+  ### Standard setup.
+  ###
+
+  ## Again, a little different.
+  ## Start by figuring out the best title we can.
+  my $best_title = $input_ref_id; # start with the worst as a default
+  # if ( $gp_info_hash->{$input_gp_id}{'name'} ){
+  #   $best_title = $gp_info_hash->{$input_gp_id}{'name'};
+  # }elsif( $gp_info_hash->{$input_gp_id}{'label'} ){
+  #   $best_title = $gp_info_hash->{$input_gp_id}{'label'};
+  # }
+  ## Page settings.
+  $self->set_template_parameter('page_name', 'reference');
+  $self->set_template_parameter('page_title',
+				'AmiGO 2: Reference Details for ' .
+				$input_ref_id);
+  $self->set_template_parameter('content_title', $best_title);
+  $self->set_template_parameter('page_content_title', $best_title);
+  my($page_title,
+     $page_content_title,
+     $page_help_link) = $self->_resolve_page_settings('reference');
+  $self->set_template_parameter('page_help_link', $page_help_link);
+
+  ## Our AmiGO services CSS.
+  my $prep =
+    {
+     css_library =>
+     [
+      #'standard',
+      'com.bootstrap',
+      'com.jquery.jqamigo.custom',
+      'amigo',
+      'bbop'
+     ],
+     javascript_library =>
+     [
+      'com.jquery',
+      'com.bootstrap',
+      'com.jquery-ui'
+     ],
+     javascript =>
+     [
+      $self->{JS}->get_lib('GeneralSearchForwarding.js'),
+      $self->{JS}->get_lib('ReferenceDetails.js'),
+      $self->{JS}->make_var('global_live_search_query', $query),
+      $self->{JS}->make_var('global_live_search_filters', $filters),
+      $self->{JS}->make_var('global_live_search_pins', $pins),
+      $self->{JS}->make_var('global_acc', $input_ref_id)
+     ],
+     content =>
+     [
+      'pages/reference_details.tmpl'
+     ]
+    };
+  $self->add_template_bulk($prep);
+
+  return $self->generate_template_page_with();
+}
+
+
 ## Model annotation information.
 sub mode_model_details {
 
@@ -2043,6 +2187,60 @@ sub mode_model_biology {
      content =>
      [
       'pages/model_biology.tmpl'
+     ]
+    };
+  $self->add_template_bulk($prep);
+
+  return $self->generate_template_page_with();
+}
+
+
+## /All/ ontologies visualized.
+sub mode_ontologies {
+
+  my $self = shift;
+
+  ## Warn people away for now.
+  $self->add_mq('warning',
+		'This page is considered <strong>ALPHA</strong> software.');
+
+  ###
+  ### Standard setup.
+  ###
+
+  ## Page settings.
+  ## Again, a little special.
+  $self->set_template_parameter('page_name', 'ontologies');
+  $self->set_template_parameter('page_title', 'AmiGO 2: Ontologies');
+  my($page_title, $page_content_title, $page_help_link) =
+      $self->_resolve_page_settings('ontologies');
+  $self->set_template_parameter('page_help_link', $page_help_link);
+
+  ## Our AmiGO services CSS.
+  my $prep =
+    {
+     css_library =>
+     [
+      #'standard',
+      'com.bootstrap',
+      'com.jquery.jqamigo.custom',
+      'amigo',
+      'bbop'
+     ],
+     javascript_library =>
+     [
+      'com.jquery',
+      'com.bootstrap',
+      'com.jquery-ui',
+     ],
+     javascript =>
+     [
+      $self->{JS}->get_lib('GeneralSearchForwarding.js'),
+      $self->{JS}->get_lib('AmiGOOntView.js')
+     ],
+     content =>
+     [
+      'pages/view_ontologies.tmpl'
      ]
     };
   $self->add_template_bulk($prep);
