@@ -1645,7 +1645,7 @@ sub mode_term_details {
   ## Don't use usual mechanism--a little special.
   $self->set_template_parameter('page_name', 'term');
   $self->set_template_parameter('page_title',
-				'AmiGO 2: Term Details for "' .
+				'Planteome: Term Details for "' .
 				$term_info_hash->{$input_term_id}{'name'} .
 				'" (' .	$input_term_id . ')');
   $self->set_template_parameter('content_title',
@@ -1795,7 +1795,7 @@ sub mode_gene_product_details {
   ## Page settings.
   $self->set_template_parameter('page_name', 'gene_product');
   $self->set_template_parameter('page_title',
-				'AmiGO 2: Gene Product Details for ' .
+				'Planteome: Gene Product Details for ' .
 				$input_gp_id);
   $self->set_template_parameter('content_title', $best_title);
   $self->set_template_parameter('page_content_title', $best_title);
@@ -1940,7 +1940,7 @@ sub mode_reference_details {
   ## Page settings.
   $self->set_template_parameter('page_name', 'reference');
   $self->set_template_parameter('page_title',
-				'AmiGO 2: Reference Details for ' .
+				'Planteome: Reference Details for ' .
 				$input_ref_id);
   $self->set_template_parameter('content_title', $best_title);
   $self->set_template_parameter('page_content_title', $best_title);
@@ -2034,7 +2034,7 @@ sub mode_model_details {
   ## Again, a little special.
   $self->set_template_parameter('page_name', 'model');
   $self->set_template_parameter('page_title',
-				'AmiGO 2: Model Details for ' .
+				'Planteome: Model Details for ' .
 				$input_id);
   my($page_title, $page_content_title, $page_help_link) =
     $self->_resolve_page_settings('model');
@@ -2146,7 +2146,7 @@ sub mode_model_biology {
   ## Page settings.
   ## Again, a little special.
   $self->set_template_parameter('page_name', 'biology');
-  $self->set_template_parameter('page_title', 'AmiGO 2: Biology');
+  $self->set_template_parameter('page_title', 'Planteome: Biology');
   my($page_title, $page_content_title, $page_help_link) =
       $self->_resolve_page_settings('biology');
   $self->set_template_parameter('page_help_link', $page_help_link);
@@ -2211,7 +2211,7 @@ sub mode_ontologies {
   ## Page settings.
   ## Again, a little special.
   $self->set_template_parameter('page_name', 'ontologies');
-  $self->set_template_parameter('page_title', 'AmiGO 2: Ontologies');
+  $self->set_template_parameter('page_title', 'Planteome: Ontologies');
   my($page_title, $page_content_title, $page_help_link) =
       $self->_resolve_page_settings('ontologies');
   $self->set_template_parameter('page_help_link', $page_help_link);
@@ -2277,13 +2277,13 @@ sub mode_phylo_graph {
   my $global_family = undef;
   if( $input_family_id ){
     $self->set_template_parameter('page_title',
-				  'AmiGO 2:  Family tree for ' .
+				  'Planteome:  Family tree for ' .
 				  $input_family_id);
     $self->set_template_parameter('page_content_title', $input_family_id);
     $self->set_template_parameter('demo_mode', 'false');
     $global_family = $input_family_id;
   }else{
-    $self->set_template_parameter('page_title', 'AmiGO 2:  Family tree demo');
+    $self->set_template_parameter('page_title', 'Planteome:  Family tree demo');
     $self->set_template_parameter('page_content_title', 'Family tree demo');
     $self->set_template_parameter('demo_mode', 'true');
     $global_family = undef;
