@@ -374,11 +374,11 @@ function ReferenceDetailsInit(){
 			    '<dd>',
 			    '<a href="https://www.ncbi.nlm.nih.gov/pubmed/' + bbop.first_split(':', global_acc)[1] + '">' + global_acc + '</a>',
 			    '</dd>',
-			    // Feedback.
-			    '<dt>Feedback</dt>',
-			    '<dd>',
-			    'Contact the <a href="http://geneontology.org/form/contact-go" title="GO Helpdesk.">GO Helpdesk</a> if you find mistakes or have concerns about the data you find here.',
-			    '</dd>',
+			    // // Feedback.
+			    // '<dt>Feedback</dt>',
+			    // '<dd>',
+			    // 'Contact the <a href="http://geneontology.org/form/contact-go" title="GO Helpdesk.">GO Helpdesk</a> if you find mistakes or have concerns about the data you find here.',
+			    // '</dd>',
 			    '</dl>'
 			];
 			jQuery('#info-area').append(info.join(' '));
@@ -387,16 +387,16 @@ function ReferenceDetailsInit(){
 			// Powered by NCBI.
 			jQuery('#info-area').append([
 			    '<p>',
-			    'Powered by NCBI\'s <a href=http://eutils.ncbi.nlm.nih.gov"">E-utilities</a>.',
+			    'Powered by NCBI\'s <a href="https://eutils.ncbi.nlm.nih.gov">E-utilities</a>.',
 			    '<br />',
-			    'Please read NCBI\'s <a href="http://www.ncbi.nlm.nih.gov/About/disclaimer.html">Disclaimer and Copyright notice.',
+			    'Please read NCBI\'s <a href="https://www.ncbi.nlm.nih.gov/home/about/policies.shtml">Disclaimer and Copyright notice.',
 			    '</p>',
 			].join(' '));
 			
 			// Get feedback from viewers.
 			jQuery('#info-area').append([
 			    '<p>',
-			    '<b>Are you the author</b> (or have a deep understanding) of this paper? If so, <b>do these annotations look okay to you</b>? <a href="http://geneontology.org/form/contact-go">Let us know</a>!',
+			    '<span class="glyphicon glyphicon-pencil"></span><b>Are you the author</b> (or have a deep understanding) of this paper? If so, <b>do these annotations look okay to you</b>? <a href="http://geneontology.org/form/contact-go">Let us know</a>!',
 			    '</p>'
 			].join(' '));
 			
@@ -409,7 +409,7 @@ function ReferenceDetailsInit(){
 		});
 		
 		// Trigger.	    
-		var url = 'http://eutils.ncbi.nlm.nih.gov';
+		var url = 'https://eutils.ncbi.nlm.nih.gov';
 		var path = '/entrez/eutils/efetch.fcgi';
 		var pay = {
 		    'tool': 'amigo_client_2.4.x',

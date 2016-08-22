@@ -459,12 +459,17 @@ sub galaxy_settings {
     $self->set_template_parameter('galaxy_url', $in_galaxy);
     $self->set_template_parameter('galaxy_url_external_p', $galaxy_external_p);
     if( $galaxy_external_p ){
-      $self->add_mq('notice', 'Welcome Galaxy visitor!');
+      $self->add_mq('notice', "Welcome Galaxy visitor from <a href=\"$in_galaxy\">$in_galaxy</a>!");
     }
 
     ## Add a global galaxy URL if we're good.
     my $gjs = $self->{JS}->make_var('global_galaxy_url', $in_galaxy);
     $self->add_template_javascript($gjs);
+    if( $galaxy_external_p ){
+      my $gext = $self->{JS}->make_var('global_galaxy_external_p',
+				       $galaxy_external_p);
+      $self->add_template_javascript($gext);
+    }
   }
 
   return $retval;
@@ -875,6 +880,10 @@ sub _resolve_page_settings {
     $page_title = 'Planteome: Cross References';
     $page_content_title = 'Current Cross Reference Abbreviations';
     $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Cross_References';
+  }elsif( $page_name eq 'base_statistics' ){
+    $page_title = 'AmiGO 2: Base Statistics';
+    $page_content_title = 'Base Statistics';
+    $page_help_link = $wiki_base . 'AmiGO_2_Manual:_Base_Statistics';
   }
 
   return ($page_title,

@@ -148,7 +148,7 @@ var amigo_url = a['AMIGO_DYNAMIC_URL'].value;
 var golr_private_url = a['AMIGO_PRIVATE_GOLR_URL'].value;
 var golr_public_url = a['AMIGO_PUBLIC_GOLR_URL'].value;
 var owltools_max_memory = a['OWLTOOLS_MAX_MEMORY'].value || '4G';
-var owltools_runner = 'java -Xms2048M -DentityExpansionLimit=4086000 -Djava.awt.headless=true -Xmx' + owltools_max_memory + ' -jar ./java/lib/owltools-runner-all.jar';
+var owltools_runner = 'java -Xms1024M -DentityExpansionLimit=4086000 -Djava.awt.headless=true -Xmx' + owltools_max_memory + ' -jar ./java/lib/owltools-runner-all.jar';
 var metadata_list = _tilde_expand_list(a['GOLR_METADATA_LIST'].value);
 var metadata_string = metadata_list.join(' ');
 var ontology_metadata = tilde(a['GOLR_METADATA_ONTOLOGY_LOCATION'].value);
@@ -237,8 +237,8 @@ gulp.task('test-js', function () {
 
 //
 gulp.task('test-app', shell.task(_run_cmd_list(
-    //['bash -c "source ./test-app/behave/bin/activate && TARGET=' + amigo_url + ' BROWSER=phantomjs behave ./test-app/behave/"']
-    ['bash -c "source ./test-app/behave/bin/activate && TARGET=' + amigo_url + ' BROWSER=firefox behave ./test-app/behave/*.feature"']
+    ['bash -c "source ./test-app/behave/bin/activate && TARGET=' + amigo_url + ' BROWSER=phantomjs behave ./test-app/behave/"']
+    //['bash -c "source ./test-app/behave/bin/activate && TARGET=' + amigo_url + ' BROWSER=firefox behave ./test-app/behave/*.feature"']
 )));
 
 ///
@@ -267,6 +267,7 @@ var web_compilables = [
     // 'FreeBrowse.js'    // current working set
     // 'ReferenceDetails.js'    // current working set
     // 'AmiGOOntView.js'    // current working set
+    ///
     'AmiGOBioView.js',
     'AmiGOCytoView.js',
     'AmiGOOntView.js',
@@ -398,6 +399,21 @@ gulp.task('load-ontology', shell.task(_run_cmd(
      '--solr-url', golr_private_url,
      '--solr-config', ontology_metadata,
      '--solr-log', solr_load_log,
+     '--solr-load-ontology',
+     '--solr-load-ontology-general']
+)));
+
+// Try and load a single ontology safely, with no timming gaps.
+// Use case NEO.
+gulp.task('load-ontology-purge-safe', shell.task(_run_cmd(
+    [owltools_runner,
+     ontology_string,
+     owltools_ops_flags,
+     '--ontology-pre-check',
+     '--solr-url', golr_private_url,
+     '--solr-config', ontology_metadata,
+     '--solr-log', solr_load_log,
+     '--solr-purge',
      '--solr-load-ontology',
      '--solr-load-ontology-general']
 )));
