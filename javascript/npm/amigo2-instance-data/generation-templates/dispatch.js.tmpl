@@ -200,6 +200,7 @@ var alternate_id = function(id){
     return retstr;
 };
 
+
 /*
  * Variable: dispatch
  * 
@@ -224,6 +225,11 @@ var dispatch_table = {
 	}
     },
     "alternate_id" : {
+	"context" : {
+            "bbop-widget-set.live_results": alternate_id
+	}
+    },
+    "id" : {
 	"context" : {
             "bbop-widget-set.live_results": alternate_id
 	}
