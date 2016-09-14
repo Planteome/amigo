@@ -45,4 +45,9 @@ amigo.data.dispatch = {
          "bbop.widgets.search_pane" : "amigo.handlers.alternate_id"
       }
    }
+   "id" : {
+      "context" : {
+         "bbop.widgets.search_pane" : "amigo.handlers.alternate_id"
+      }
+   }
 };
