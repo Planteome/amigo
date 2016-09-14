@@ -3,7 +3,7 @@
 ####
 id: annotation
 schema_generating: true
-description: Associations between Planteome terms and genes or gene products.
+description: Associations between Planteome terms and bioentities
 display_name: Annotations
 document_category: annotation
 weight: 20

@@ -13,7 +13,7 @@ filter_weights: taxon_subset_closure_label^9.0 evidence_type_closure^8.0
 fields:
   - id: taxon
     description: "Taxonomic group."
-    display_name: Organism
+    display_name: Taxon
     type: string
     property: []
   - id: taxon_label

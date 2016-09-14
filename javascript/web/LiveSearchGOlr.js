@@ -303,7 +303,7 @@ function LiveSearchGOlrInit(){
 
 	}else if( personality === 'bioentity' ){
 
-	    label_to_use = 'gene product(s)';
+	    label_to_use = 'bioentities';
     	    manager.add_query_filter('document_category', 
 				     'bioentity', ['*']);
 

@@ -134,7 +134,7 @@ function CreateFilterManager(){
     
     // Add the filter widget and hook to manager.
     var hargs = {
-	meta_label: 'Total gene products:&nbsp;',
+	meta_label: 'Total bioentities:&nbsp;',
 	// free_text_placeholder:
 	// 'Input text to filter against all remaining documents',
 	'display_free_text_p': false
@@ -479,7 +479,7 @@ function ResetTreeWithRootInfo(root_docs, entity_counts, filter_manager){
 		var lstate = ann_man.get_filter_query_string();
 		var lurl = linker.url(lstate, 'search', 'bioentity');
 
-		add_ons.push(['Gene products', '<a href="' + lurl + '" target="_blank"><b>retrieve gene products annotated to this term for this filter set</b></a>']);
+		add_ons.push(['Bioentities ', '<a href="' + lurl + '" target="_blank"><b>retrieve bioentities annotated to this term for this filter set</b></a>']);
 
 		// 
 		widgets.display.term_shield(doc, confc, linker, {}, add_ons);
