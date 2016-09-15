@@ -86,13 +86,13 @@ fields:
     searchable: true
   - id: taxon_subset_closure
     description: "Taxonomic group (direct) and ancestral groups that are within the specified subset (e.g mammalia, eukaryota)."
-    display_name: Organism
+    display_name: Taxon
     type: string
     cardinality: multi
     property: []
   - id: taxon_subset_closure_label
     description: "Taxonomic group (direct) and ancestral groups that are within the specified subset (e.g mammalia, eukaryota)."
-    display_name: Organism
+    display_name: Taxon
     type: string
     cardinality: multi
     property: []
