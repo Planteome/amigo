@@ -280,3 +280,124 @@ production and annotation counts by (transitive) species.
     "date": "2016-02-25T14:02:43"
 }
 ```
+
+### /api/disambiguation/bioentity
+
+Try and resolve the identifiers of one or more string entities in a
+"bioentity" document.
+
+In addition to one or more "entity" parameters, you need to have a
+single "species" parameter.
+
+#### Example 1
+
+Failure to have any entities to disambiguate.
+
+[/api/disambiguation/bioentity?species=NCBITaxon:3037](/api/disambiguation/bioentity?species=NCBITaxon:3037)
+
+```json
+{
+  "date": "2016-11-14T19:11:28",
+  "time": 0,
+  "data": null,
+  "comments": [
+    "Death by lack of entities."
+  ],
+  "arguments": {
+    "species": [
+      "NCBITaxon:3037"
+    ],
+    "entity": []
+  },
+  "status": "failure",
+  "service": "/api/disambiguation/bioentity"
+}
+```
+
+#### Example 2
+
+Empty return on an unknown species.
+
+[/api/disambiguation/bioentity?species=NCBITaxon:99999&entity=pacA&entity=UniProtKB:Q76L33](/api/disambiguation/bioentity?species=NCBITaxon:99999&entity=pacA&entity=UniProtKB:Q76L33)
+
+```json
+{
+  "date": "2016-11-15T13:11:18",
+  "time": 0,
+  "data": {
+    "ugly": [],
+    "bad": [
+      {
+        "results": [],
+        "input": "pacA"
+      },
+      {
+        "results": [],
+        "input": "UniProtKB:Q76L33"
+      }
+    ],
+    "good": []
+  },
+  "comments": [],
+  "arguments": {
+    "species": [
+      "NCBITaxon:99999"
+    ],
+    "entity": [
+      "pacA",
+      "UniProtKB:Q76L33"
+    ]
+  },
+  "status": "success",
+  "service": "/api/disambiguation/bioentity"
+}
+```
+
+#### Example 3
+
+Resolve a synbol and an id for "Euglena longa".
+
+[/api/disambiguation/bioentity?species=NCBITaxon:3037&entity=pacA&entity=UniProtKB:Q76L33](/api/disambiguation/bioentity?species=NCBITaxon:3037&entity=pacA&entity=UniProtKB:Q76L33)
+
+```json
+{
+  "date": "2016-11-15T13:11:07",
+  "time": 0,
+  "data": {
+    "ugly": [],
+    "bad": [],
+    "good": [
+      {
+        "results": [
+          {
+            "matched": "bioentity_label",
+            "id": "UniProtKB:Q76L34"
+          }
+        ],
+        "input": "pacA"
+      },
+      {
+        "results": [
+          {
+            "matched": "bioentity",
+            "id": "UniProtKB:Q76L33"
+          }
+        ],
+        "input": "UniProtKB:Q76L33"
+      }
+    ]
+  },
+  "comments": [],
+  "arguments": {
+    "species": [
+      "NCBITaxon:3037"
+    ],
+    "entity": [
+      "pacA",
+      "UniProtKB:Q76L33"
+    ]
+  },
+  "status": "success",
+  "service": "/api/disambiguation/bioentity"
+}
+```

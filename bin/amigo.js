@@ -21,6 +21,30 @@ var path = require('path');
 var us = require('underscore');
 //var yaml = require('yamljs');
 
+// Special for dealing with disambiguation cache. Let the cache live
+// for a day, and do a check to flush every hour.
+var NodeCache = require("node-cache");
+var discache = new NodeCache({
+    // If use clones, the cache becomes incredibly unusably slow.
+    "useClones": false,
+    // With these two values, I can guarentee a purge at least at 24hrs.
+    "stdTTL": 82800, // (* 60 60 23) === seconds per 23hrs
+    "checkperiod": 3600 // (* 60 60) === seconds per hour
+});
+
+// TODO: Parameterize the search fields that we want to work
+// with. The *first* is considered to be the primary unique 
+// proxy identifier, which will also be used to lookup docs later.
+var bioentity_search_fields = [
+    "bioentity",
+    "bioentity_label",
+    "bioentity_name",
+    "bioentity_internal_id",
+    "synonym"
+];
+var bioentity_proxy_id_field = bioentity_search_fields[0];
+	
+
 // Templating.
 //var md = require('markdown');
 var marked = require('marked');
@@ -631,7 +655,7 @@ function abstract_search(req, res, personality, queries, filters, lite_p){
 	manager.register('search', function(resp, man){
 	    
 	    // See what we got.
-		// Good response.
+	    // Good response.
 	    if( resp.documents().length === 0 ){
 		envl.comments('Nothing found for: ' + srch_report);
 	    }else{ 
@@ -975,6 +999,257 @@ app.all('/api/statistics/overview', function (req, res){
 
 	res.json(envl.structure());
     });
+});
+
+// 
+app.all('/api/disambiguation/bioentity', function (req, res){
+
+    // Theoretical good result envelope to start.
+    var envl = new envelope('/api/disambiguation/bioentity');
+
+    // Get parameters as lists.
+    var entities = _extract(req, 'entity');
+    var species = _extract(req, 'species');
+    envl.arguments({'entity': entities, 'species': species});
+
+    // Get our query terms.
+    if( us.isEmpty(species) ){
+	return _response_json_fail(res, envl, 'Death by lack of species.');
+    }else if( us.isEmpty(entities) ){
+	return _response_json_fail(res, envl, 'Death by lack of entities.');
+    }else if( species.length !== 1 ){
+	return _response_json_fail(res, envl,
+				   'Currently only support single species.');
+    }else{
+
+	// Our single species for discussion (for now).
+	var spc = species[0];
+
+	// First, let's try against the cache, and talk a little bit
+	// about what is in it. Per species, the cache looks like:
+	// SPECIES: {
+	//   documents: {ALL_SOLR_RETURN_DOCUMENTS_IN_HASH_BY_PROXY_ID},
+	//   references: {
+	//     entity_str_1: [
+	//       PROXY_ID_1,
+	//       PROXY_ID_2,
+	//       ...
+	//     ],
+	//   ...
+	// }
+	// 
+	// For example:
+	// TODO
+	// 
+	//ll('Disambiguation/bioentity try cache...');
+	var cache = discache.get(spc);
+
+	// First, let us discuss what will happen when we have a
+	// populated cache to work with, one way or another.
+	// The cache is
+	var collect_results = function(cache){
+
+	    // Frame to hang our results on.
+	    var results = {
+		"good": [],
+		"bad": [],
+		"ugly": []
+	    };
+
+	    // Break out the two parts of the species cache.
+	    var doc_lookup = cache['documents'];
+	    var str_refs = cache['references'];
+	    
+	    // Comb through the cache, carefully, and get the results
+	    // that we can. First, for each of the entities try and
+	    // pull out the right fields.
+	    us.each(entities, function(entity){
+
+		var entity_hits = [];
+
+		// Check to see if we can find any document references
+		// for our given string.
+		if( str_refs && us.isArray(str_refs[entity]) ){
+
+		    // For each of the matched IDs, lookup the
+		    // document in question and try and figure out
+		    // which field or fields matched.
+		    var match_proxy_ids = str_refs[entity];
+		    us.each(match_proxy_ids, function(match_proxy_id){
+
+			// Retrieve the document by proxy ID.
+			var doc = doc_lookup[match_proxy_id];
+			if( doc ){
+
+			    // Look in all the possibly multi-valued
+			    // fields in the doc for the match.
+			    us.each(bioentity_search_fields, function(search_field){
+
+				//console.log("search_field: ", search_field);
+				
+				var vals = doc[search_field];
+				// Array-ify the field if not already.
+				if( vals && ! us.isArray(vals) ){
+				    vals = [vals];
+				}
+				us.each(vals, function(val){
+
+				    // Record that we found the exact
+				    // match we want.
+				    if( entity === val ){
+					entity_hits.push({
+					    "id": match_proxy_id,
+					    "matched": search_field
+					});
+				    }				    
+				});
+			    });
+			}
+		    });
+		}
+
+		// The results are good, bad, or ugly, depending on the
+		// number.
+		var rtype = null;
+		if( entity_hits.length === 1 ){
+		    rtype = "good";
+		}else if( entity_hits.length === 0 ){
+		    rtype = "bad";
+		}else{
+		    rtype = "ugly";
+		}
+
+		//console.log("results: ", results);
+		
+		// Push the found results into the right section.
+		results[rtype].push({
+		    "input": entity,
+		    "results": entity_hits
+		});
+
+	    });
+
+	    return results;
+	};
+	
+	// Well, if we have the cache, great! Nice and easy.
+	if ( cache ){
+
+	    ll('Disambiguation/bioentity cache direct hit for: ' + spc);
+
+	    var collected_results = collect_results(cache);
+	    //ll('Disambiguation/bioentity create data envelope.');
+	    envl.data(collected_results);
+	    //ll('Disambiguation/bioentity send direct hit results.');
+	    res.json(envl.structure());
+
+	}else{
+
+	    ll('Disambiguation/bioentity cache miss for: ' + spc);
+	    
+	    // If we have a cache miss, populate the cache for our
+	    // species and then immediately use it. Need to start by
+	    // getting all bioentities for our species and storing it
+	    // locally.	    
+	    var gconf = new golr_conf.conf(amigo.data.golr);
+	    var engine = new node_engine(golr_response);
+	    var go = new golr_manager(golr_url, gconf, engine, 'async');
+	    go.set_personality('bioentity');
+
+	    // 
+	    go.add_query_filter('document_category', 'bioentity');
+	    each(species, function(sp){
+		go.add_query_filter('taxon_closure', sp);
+	    });
+	    go.set_facet_limit(0); // care not about facets
+	    go.lite(true);
+	    // Hopefully 100,000,000 is enough for now.
+	    go.set_results_count(100000000);
+	    
+	    // Process promise.
+	    var prom = go.search();
+	    prom.then(function(resp){
+
+		//console.log("resp: ", resp);
+		ll('Disambiguation/bioentity populating cache for: ' + spc);
+		
+		// Okay, we have the results, now we need to use them
+		// to populate the cache.
+		// Cycle through and get the cache together. We essentially
+		// want to melt is down by every possible string and value
+		// for our input search fields.
+		var species_cache = {
+		    "documents": {},
+		    "references": {}
+		};
+		var docs = resp.documents();
+		ll('Disambiguation/bioentity have item count: ' + docs.length);
+		us.each(docs, function(doc){
+
+		    //console.log("doc: ", doc);
+
+		    // Extract the proxy ID from the doc, hard fail if
+		    // we cannot.
+		    var proxy_id = doc[bioentity_proxy_id_field];
+		    if( ! proxy_id ){
+			var estr = 'Could not find proxy ID in cache create: ' +
+				bioentity_proxy_id_field;
+			return _response_json_fail(res, envl, estr);
+		    }
+
+		    // Index this doc for later use by the proxy id.
+		    species_cache["documents"][proxy_id] = doc;
+		    
+		    // Now cycle through the doc and melf it down to its
+		    // indexed components.
+		    us.each(bioentity_search_fields, function(search_field){
+
+			var vals = doc[search_field];
+			// Array-ify the field if not already.
+			if( vals && ! us.isArray(vals) ){
+			    vals = [vals];
+			}
+			us.each(vals, function(val){
+			    
+			    // We've gotten here, so prepare the cache
+			    // at this location. Each value is
+			    // essentially a top-level string.
+			    if( ! species_cache["references"][val] ){
+				species_cache["references"][val] = [];
+			    }
+
+			    species_cache["references"][val].push(proxy_id);
+			});
+			
+		    });
+		    
+		});
+		
+		//ll('Disambiguation/bioentity species cache created');
+		//console.log("species_cache: ", species_cache);
+
+		// Simply add to the cache.
+		discache.set(spc, species_cache);
+		//ll('Disambiguation/bioentity cache set');
+
+		// Well, we have the species cache, so use it.
+		var collected_results = collect_results(species_cache);
+		//console.log("collected_results: ", collected_results);
+		envl.data(collected_results);
+
+		res.json(envl.structure());
+		
+	    }).fail(function(err){ // a little fail mode
+ 		if(err){
+ 	    	    return _response_json_fail(res, envl,
+					       'Error processing set');
+ 		}
+ 	    }).done();
+	
+	}
+
+	ll('Disambiguation/bioentity end of starter.');
+    }
 });
 
 ///
