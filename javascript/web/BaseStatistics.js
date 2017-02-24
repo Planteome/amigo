@@ -77,7 +77,7 @@ function BaseStatisticsInit(){
 	var data = [exp_trace, nonexp_trace];
 	
 	var layout = {
-	    title: 'Experimental annotations by species',
+	    title: 'Total number of annotations by species: Experimental and Non-experimental (inferred)',
 	    barmode: 'stack',
 	    xaxis: {
 		title: 'Species',
@@ -95,7 +95,7 @@ function BaseStatisticsInit(){
     ///
     /// Annotation \ assigners | exp/non-exp
     ///
-
+/*
     (function(){
 
 	var exp_trace = {
@@ -145,7 +145,7 @@ function BaseStatisticsInit(){
 	Plotly.newPlot('graph02', data, layout);
 
     })();
-
+*/
     ///
     /// Annotation \ evidence
     ///
@@ -172,7 +172,7 @@ function BaseStatisticsInit(){
 	var data = [ev_trace];
 	
 	var layout = {
-	    title: 'Annotations by evidence',
+	    title: 'Annotations by evidence type',
 	    barmode: 'stack',
 	    xaxis: {
 		title: 'Evidence type',
@@ -226,7 +226,7 @@ function BaseStatisticsInit(){
 	});
 
 	var layout = {
-	    title: 'Annotations by aspect/species by evidence',
+	    title: 'GO Annotations by aspect/species by evidence',
 	    barmode: 'stack',
 	    xaxis: {
 		title: 'Aspect: Species',

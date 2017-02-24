@@ -3,10 +3,10 @@
 [% INCLUDE common/noscript_js_necessary.tmpl %]
 
 [% rollup_id = "info_header" %]
-[% rollup_anchor = "Base Statistics in GO" %]
+[% rollup_anchor = "Base Statistics in Planteome" %]
 [% INCLUDE "common/info_rollup_start.tmpl" %]
 <p>
-   Annotation counts and statistics that provide an overview of the GO
+   Annotation counts and statistics that provide an overview of the Planteome
   data available in AmiGO.
 </p>
 [% INCLUDE "common/info_rollup_end.tmpl" %]
@@ -45,26 +45,28 @@
 	  Annotations by species
 	</a>
       </li>
-      <li>
+<!--      <li>
 	<a href="#experimental-annotations-by-assigner">
 	  Annotations by assigner
 	</a>
       </li>
+-->
       <li>
 	<a href="#annotations-by-evidence">
 	  Annotations by evidence
 	</a>
       </li>
       <li>
-	<a href="#annotations-by-aspect-species-by-evidence">
-	  Annotations by aspect/species by evidence
+	<a href="#go-annotations-by-aspect-species-by-evidence">
+	  GO Annotations by aspect/species by evidence
 	</a>
       </li>
-      <li>
+<!--      <li>
 	<a href="#experimental-annotation-publications-by-assigner">
 	  Annotation publications by assigner
 	</a>
       </li>
+-->
     </ul>
     
   </div>
@@ -75,12 +77,6 @@
 
     <div id="graph01" style="width: 800px; height: 600px;"></div>
     
-  </div>
-</div>
-
-<div id="experimental-annotations-by-assigner" class="panel panel-default">
-  <div class="panel-body">
-    <div id="graph02" style="width: 800px; height: 600px;"></div>
   </div>
 </div>
 
@@ -96,11 +92,13 @@
   </div>
 </div>
 
-<div id="experimental-annotation-publications-by-assigner" class="panel panel-default">
+<!--
+<div id="annotations-by-assigner" class="panel panel-default">
   <div class="panel-body">
-    <div id="graph05" style="width: 800px; height: 600px;"></div>
+    <div id="graph02" style="width: 800px; height: 600px;"></div>
   </div>
 </div>
+-->
 
 [% END %]
 
