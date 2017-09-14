@@ -393,6 +393,7 @@ gulp.task('check-ontology-data', shell.task(_run_cmd(
 
 gulp.task('load-ontology', shell.task(_run_cmd(
     [owltools_runner,
+     '--catalog-xml', catalog_file,
      ontology_string,
      owltools_ops_flags,
      '--solr-url', golr_private_url,
