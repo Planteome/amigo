@@ -61,6 +61,7 @@ var our_evidence_of_interest = [
     'curator inference', // okay
     'author statement',
     'combinatorial evidence',
+    'evidence used in automatic assertion',
     'genomic context evidence'
     //'biological system reconstruction',
     //'imported information'
@@ -406,7 +407,7 @@ function second_pass(){
 	// glob['annotation']['species_by_aspect_by_evidence'] : {},
 	each(our_evidence_of_interest, function(ev){
 
-	    each(['P', 'F', 'C'], function(aspect){
+	    each(['P', 'F', 'C', 'T', 'A', 'E', 'G'], function(aspect){
 		
 		glob_funs.push(function(){
 

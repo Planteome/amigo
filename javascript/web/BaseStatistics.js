@@ -210,7 +210,7 @@ function BaseStatisticsInit(){
 		var slbl = spc[0];
 		var sid = spc[1];
 	    
-		us.each(['P', 'F', 'C'], function(aspect){
+		us.each(['P', 'F', 'C', 'T', 'A', 'E', 'G'], function(aspect){
 		    
 		    // Add axis label.
 		    ev_trace.x.unshift(aspect + ': ' + slbl);
@@ -226,7 +226,7 @@ function BaseStatisticsInit(){
 	});
 
 	var layout = {
-	    title: 'GO Annotations by aspect/species by evidence',
+	    title: 'Ontology annotations by aspect/species by evidence',
 	    barmode: 'stack',
 	    xaxis: {
 		title: 'Aspect: Species',
