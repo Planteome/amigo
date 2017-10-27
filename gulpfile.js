@@ -420,6 +420,7 @@ gulp.task('load-ontology-purge-safe', shell.task(_run_cmd(
 
 gulp.task('load-gafs', shell.task(_run_cmd(
     [owltools_runner,
+     '--catalog-xml', catalog_file,
      ontology_string,
      owltools_ops_flags,
      '--solr-url', golr_private_url,
