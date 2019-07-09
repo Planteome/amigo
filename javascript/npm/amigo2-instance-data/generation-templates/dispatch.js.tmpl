@@ -202,6 +202,47 @@ var alternate_id = function(id){
 
 
 /*
+ * Function: aspect
+ *
+ * Essentially make single letter aspect more readable
+ *
+ * Parameters:
+ *  string or null
+ *
+ * Returns:
+ *  same
+ *
+ * Also See: <bbop.handler>
+ */
+var aspect = function (id) {
+
+    var retstr;
+    switch (id) {
+    case "T":
+        retstr = "Trait (T)";
+        break;
+    case "A":
+        retstr = "Anatomy (A)";
+        break;
+    case "G":
+        retstr = "Growth (G)";
+        break;
+    case "C":
+        retstr = "Cell part (C)";
+        break;
+    case "F":
+        retstr = "Mol Function (F)";
+        break;
+    case "P":
+        retstr = "Bio process (P)";
+        break;
+    default:
+        retstr = id;
+    }
+    return retstr;
+};
+
+/*
  * Variable: dispatch
  * 
  * The configuration for the data.
@@ -232,6 +273,11 @@ var dispatch_table = {
     "id" : {
 	"context" : {
             "bbop-widget-set.live_results": alternate_id
+	}
+    },
+    "aspect" : {
+	"context" : {
+            "bbop-widget-set.live_results": aspect
 	}
     }
 };
