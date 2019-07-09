@@ -28,7 +28,7 @@ use DBI;
 use Data::Dumper;
 use File::Slurp;
 use File::Basename;
-
+use URI::Encode;
 
 ## NOTE: This will run on app init (once even in a mod_perl env).
 ## Perform some project-specific init behavior
@@ -41,6 +41,7 @@ sub cgiapp_init {
   $self->{CORE} = AmiGO->new();
   $self->{JS} = AmiGO::JavaScript->new();
   $self->{CSS} = AmiGO::CSS->new();
+  $self->{OUTPUT_SANITIZER} = URI::Encode->new({ encode_reserved => 0 });
 
   # ## Say goonight, Gracie.
   # $self->{CORE}->kvetch('running: '. $self->get_current_runmode() || '???');
@@ -404,7 +405,7 @@ sub decide_content_type_by_filename {
   }elsif( $fsuffix eq '.text' ){
       $ctype = 'text/plain';
   }
-  
+
   return $ctype;
 }
 
@@ -431,7 +432,7 @@ sub get_content_by_filename {
       ## All else as binary.
       $cont = read_file($path, { binmode => ':raw' });
   }
-  
+
   return $cont;
 }
 
@@ -970,9 +971,6 @@ sub _common_params_settings {
   #   $self->{CORE}->amigo_env('AMIGO_PUBLIC_CGI_BASE_URL');
   # $params->{public_opensearch} =
   #   $self->{CORE}->amigo_env('AMIGO_PUBLIC_OPENSEARCH_URL');
-  $params->{public_1x_base} =
-    $self->{CORE}->amigo_env('AMIGO_1X_PUBLIC_CGI_BASE_URL') ||
-      $params->{public_base};
   $params->{noctua_base} = $self->{CORE}->amigo_env('AMIGO_PUBLIC_NOCTUA_URL');
   $params->{BETA} =
     $self->_atoi($self->{CORE}->amigo_env('AMIGO_BETA'));
@@ -982,6 +980,8 @@ sub _common_params_settings {
     $self->_atoi($self->{CORE}->amigo_env('AMIGO_VERBOSE'));
   $params->{last_load_date} =
     $self->{CORE}->amigo_env('GOLR_TIMESTAMP_LAST');
+  $params->{data_doi} = $self->{CORE}->amigo_env('DATA_DOI_IN_USE');
+  $params->{zenodo_concept} = $self->{CORE}->amigo_env('ZENODO_CONCEPT_IN_USE');
   $params->{root_terms} = $self->{CORE}->get_root_terms();
   #$params->{release_name} = $self->{CORE}->release_name();
   #$params->{release_type} = $self->{CORE}->release_type();
@@ -1739,7 +1739,7 @@ sub json_parsable_p {
       $self->{CORE}->kvetch("with JSON: " . $json_str);
       $retval = 0;
     }
-  
+
   return $retval;
 }
 
