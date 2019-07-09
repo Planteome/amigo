@@ -13,7 +13,7 @@
     <p>We apologise for the inconvenience.</p>
     <p>Please go to <a href="http://planteome.org/contact"> Planteome feedback</a> to report this error.</p>
     <div class="well">
-      [% error %]
+      [% FILTER html %][% error %][% END %]
     </div>
     <p>
       Please include information about what page this error was found on
