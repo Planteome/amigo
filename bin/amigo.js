@@ -684,7 +684,7 @@ function abstract_search(req, res, personality, queries, filters, lite_p){
 	return _response_json_fail(res, envl,
 				   'Death by lack of known personality.');
     }else{
-
+	manager.set('rows', 25); // we want more than 10
 	// Let's get term information by search, start by making sure
 	// we're in the right category given our personality.
 	manager.add_query_filter('document_category', doc_cat);
