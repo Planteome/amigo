@@ -50,4 +50,9 @@ amigo.data.dispatch = {
          "bbop.widgets.search_pane" : "amigo.handlers.alternate_id"
       }
    }
+   "aspect" : {
+      "context" : {
+         "bbop.widgets.search_pane" : "amigo.handlers.aspect"
+      }
+   }
 };
