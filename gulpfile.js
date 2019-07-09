@@ -98,7 +98,7 @@ function _run_cmd_list(commands){
 	final_list.push('echo \'' + cmd + '\'');
 	final_list.push(cmd);
     });
-    
+
     return final_list;
 }
 
@@ -110,7 +110,7 @@ var paths = {
     // WARNING: Cannot use glob for clients--I use the explicit listing
     // to generate a dynamic browserify set.
     clients: [
-	
+
     ],
     scripts: [
 	'scripts/*'
@@ -181,8 +181,11 @@ if( a['AMIGO_API_PORT'] && a['AMIGO_API_PORT'].value ){
 var otu_mrg_imp_p = _to_boolean(a['OWLTOOLS_USE_MERGE_IMPORT'].value);
 var otu_rm_dis_p = _to_boolean(a['OWLTOOLS_USE_REMOVE_DISJOINTS'].value);
 var all_owltools_ops_flags_list = [
+    '--log-info',
     '--merge-support-ontologies',
-    (otu_mrg_imp_p ? '--merge-import http://purl.obolibrary.org/obo/go/extensions/go-plus.owl' : '' ),
+    // Make load less sensitive and more collapsed.
+    //(otu_mrg_imp_p ? '--merge-import http://purl.obolibrary.org/obo/go/extensions/go-plus.owl' : '' ),
+    (otu_mrg_imp_p ? '--merge-imports-closure' : '' ),
     '--remove-subset-entities upperlevel',
     (otu_rm_dis_p ? '--remove-disjoints' : ''),
     '--silence-elk --reasoner elk',
@@ -286,6 +289,7 @@ var web_compilables = [
     'LiveSearchGOlr.js',
     'LoadDetails.js',
     'ReferenceDetails.js',
+    'REPL.js',
     'Schema.js',
     'TermDetails.js'
 ];
@@ -403,7 +407,7 @@ gulp.task('load-ontology', shell.task(_run_cmd(
      '--solr-load-ontology-general']
 )));
 
-// Try and load a single ontology safely, with no timming gaps.
+// Try and load a single ontology safely, with no timing gaps.
 // Use case NEO.
 gulp.task('load-ontology-purge-safe', shell.task(_run_cmd(
     [owltools_runner,
@@ -454,18 +458,40 @@ gulp.task('load-models-all', shell.task(_run_cmd(
     [owltools_runner,
      ontology_string,
      owltools_ops_flags,
+     '--remove-equivalent-to-nothing-axioms', // roll out more generally?
      '--solr-url', golr_private_url,
      '--solr-log', solr_load_log,
-     '--read-lego-catalogs', catalog_file,
+     //'--read-lego-catalogs', catalog_file,
      '--read-model-folder', noctua_file_path,
      '--read-model-url-prefix', noctua_model_prefix,
-     '--solr-load-models']
+     '--solr-load-models'
+    ]
 )));
 
 gulp.task('load-optimize', shell.task(_run_cmd(
     [owltools_runner,
      '--solr-url', golr_private_url,
      '--solr-optimize']
+)));
+
+// A minimal working set with some of the more exotic stuff hanging
+// on (no opt).
+gulp.task('load-most', shell.task(_run_cmd(
+    [owltools_runner,
+     ontology_string,
+     owltools_ops_flags,
+     // General config.
+     '--solr-url', golr_private_url,
+     '--solr-log', solr_load_log,
+     // Ontology.
+     '--solr-config', ontology_metadata,
+     '--solr-load-ontology',
+     '--solr-load-ontology-general',
+     // PANTHER (reading--annotations need them too)
+     '--read-panther', panther_file_path,
+     // GAFs
+     '--solr-load-gafs', gaf_string
+    ]
 )));
 
 // TODO: Still need to add models.
@@ -537,7 +563,7 @@ gulp.task('w3c-validate', shell.task(_run_cmd_list(
 
 // Release tools for patch release.
 gulp.task('release', ['install', // compile and roll out files and js templates
-		      'publish-npm', // put to 
+		      'publish-npm', // put to
 		      'patch-bump', // bump the main amigo
 		      'sync-package-version']); // bump the subordinates
 
@@ -583,7 +609,7 @@ gulp.task('sync-package-version', function(cb) {
 /// DEBUG.
 ///
 
-// Use as: gulp buffer-check > /tmp/foo.txt 
+// Use as: gulp buffer-check > /tmp/foo.txt
 gulp.task('buffer-check', shell.task(_run_cmd_list(
     //['perl -e "for (0..1600000){ print STDOUT \\"0123456789\\n\\";}"'] // fail
     ['perl -e "for (0..1500000){ print STDOUT \\"0123456789\\n\\";}"'] // okay
@@ -658,7 +684,7 @@ gulp.task('default', ['install', 'tests', 'docs']);
 // ###
 
 // .PHONY: pass
-// pass: 
+// pass:
 // 	node ./node_modules/.bin/gulp test | grep -i fail; test $$? -ne 0
 
 // ###

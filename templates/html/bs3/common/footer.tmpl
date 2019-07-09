@@ -12,9 +12,9 @@
 
     <!-- Left. -->
     <div class="col-md-4">
-      <a href="http://geneontology.org/page/go-citation-policy#GO_Data" title="How to cite AmiGO data">Cite this data</a> &bull; <a href="http://geneontology.org/page/use-and-license" title="Terms of use for the GO project">Terms of use</a> &bull; <a href="http://geneontology.org/form/contact-go" title="Contact the GO helpdesk">GO helpdesk</a>
+      <a href="http://geneontology.org/page/go-citation-policy#GO_Data" title="How to cite AmiGO data">Cite this data</a> &bull; <a href="http://geneontology.org/page/use-and-license" title="Terms of use for the GO project">Terms of use</a> &bull; <a href="http://help.geneontology.org" title="Contact the GO helpdesk">GO helpdesk</a>
       <br />
-      Copyright &copy; 1999-2016 <a href="http://www.geneontology.org/" title="Gene Ontology home page">the Gene Ontology</a>
+      Copyright &copy; 1999-2018 <a href="http://www.geneontology.org/" title="Gene Ontology home page">the Gene Ontology</a>
     </div>
 
     <!-- Middle. -->
@@ -28,6 +28,14 @@
 
     <!-- Right. -->
     <div class="col-md-4" style="text-align: right;">
+      [% IF data_doi %]
+      <a href="https://doi.org/[% data_doi %]">
+	<img src="https://zenodo.org/badge/DOI/[% data_doi %].svg" alt="DOI">
+      </a>
+      <br />
+      [% ELSE %]
+      <!-- No DOI available. -->
+      [% END %]
       [% # Remove confusing database date. %]
       [% IF is_goose_p %]
       <!-- GO database release [% release_name %] ([% release_type %]) -->

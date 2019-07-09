@@ -1,10 +1,10 @@
 # Defaults for jetty see /etc/init.d/jetty8 for more
 
 # change to 0 to allow Jetty to start
-#NO_START=1 
+#NO_START=1
 NO_START=0
 
-# change to 'no' or uncomment to use the default setting in /etc/default/rcS 
+# change to 'no' or uncomment to use the default setting in /etc/default/rcS
 VERBOSE=yes
 
 # Run Jetty as this user ID (default: jetty)
@@ -14,6 +14,7 @@ VERBOSE=yes
 # Listen to connections from this network host
 # Use 0.0.0.0 as host to accept all connections.
 # Uncomment to restrict access to localhost
+## NOTE: See JAVA_OPTIONS, as this didn't seem to work in jetty9. -SJC
 #JETTY_HOST=$(uname -n)
 
 # The network port used by Jetty
@@ -22,14 +23,14 @@ VERBOSE=yes
 # Timeout in seconds for the shutdown of all webapps
 #JETTY_SHUTDOWN=30
 
-# Additional arguments to pass to Jetty    
+# Additional arguments to pass to Jetty
 #JETTY_ARGS=
 
-# Extra options to pass to the JVM         
+# Extra options to pass to the JVM
 #JAVA_OPTIONS="-Xmx256m -Djava.awt.headless=true"
 #JAVA_OPTIONS="-Xmx256m -Djava.awt.headless=true -Dsolr.solr.home=/srv/solr"
 #JAVA_OPTIONS="-Xmx32g -Djava.awt.headless=true -Dsolr.solr.home=/srv/solr"
-JAVA_OPTIONS="-Xmx3g -Djava.awt.headless=true -Dsolr.solr.home=/srv/solr"
+JAVA_OPTIONS="-Xmx3g -Djava.awt.headless=true -Djetty.host=localhost -Dsolr.solr.home=/srv/solr"
 #JAVA_OPTIONS="-Xmx128g -Djava.awt.headless=true -Dsolr.solr.home=/srv/solr"
 
 # Home of Java installation.

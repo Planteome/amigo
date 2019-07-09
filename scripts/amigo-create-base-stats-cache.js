@@ -157,7 +157,7 @@ function _new_manager_by_personality(personality){
 
     var engine = new node_engine(golr_response);
     var manager = new golr_manager(gserv, gconf, engine, 'async');
-    
+
     manager.set_personality(personality);
     manager.add_query_filter('document_category', personality);
 
@@ -173,7 +173,7 @@ function _new_manager_by_personality(personality){
 function _new_totals_manager_by_personality(personality){
 
     var manager = _new_manager_by_personality(personality);
-    
+
     manager.set('rows', 0);
     manager.set_facet_limit(0);
 
@@ -183,7 +183,7 @@ function _new_totals_manager_by_personality(personality){
 function _new_facets_manager_by_personality(personality){
 
     var manager = _new_manager_by_personality(personality);
-    
+
     manager.set('rows', 0);
     manager.set_facet_limit(-1);
 
@@ -200,7 +200,7 @@ function first_pass(){
     //First, collect all our assigners.
     var manager = _new_facets_manager_by_personality('annotation');
     manager.register('search', function(resp){
-		
+
 	// Extract the assigners facet.
 	// console.log('resp', resp);
 	// console.log(resp.facet_field_list());
@@ -209,15 +209,15 @@ function first_pass(){
 	var srcs = us.map(src_facet, function(datum){
 	    return datum[0];
 	});
-	
+
 	our_assigners_of_interest = srcs;
 	glob['assigners_of_interest'] = srcs;
 	//console.log('glob', glob);
-	
+
 	console.log('Going to second pass...');
 	second_pass();
     });
-	    
+
     manager.search();
 }
 
@@ -237,11 +237,11 @@ function second_pass(){
 
 	// Experimental.
 	glob_funs.push(function(){
-	    
+
 	    //  Minimal, only want count.
 	    var manager = _new_totals_manager_by_personality('annotation');
 	    manager.add_query_filter('assigned_by', src);
-	    manager.add_query_filter('evidence_type_closure',
+	    manager.add_query_filter('evidence_subset_closure_label',
 				     'experimental evidence');
 
 	    manager.register('search', function(resp){
@@ -252,14 +252,14 @@ function second_pass(){
 
 	    return manager.search();
 	});
-	
+
 	// Non-experimental.
 	glob_funs.push(function(){
 
 	    //  Minimal, only want count.
 	    var manager = _new_totals_manager_by_personality('annotation');
 	    manager.add_query_filter('assigned_by', src);
-	    manager.add_query_filter('evidence_type_closure',
+	    manager.add_query_filter('evidence_subset_closure_label',
 				     'experimental evidence', ['-']);
 
 	    manager.register('search', function(resp){
@@ -270,16 +270,16 @@ function second_pass(){
 
 	    return manager.search();
 	});
-	
+
 	// // Experimental ann by aspect.
 	// each(['P', 'F', 'C'], function(aspect){
-	    
+
 	//     glob_funs.push(function(){
 
 	// 	//  Minimal, only want count.
 	// 	var manager = _new_totals_manager_by_personality('annotation');
 	// 	manager.add_query_filter('assigned_by', src);
-	// 	manager.add_query_filter('evidence_type_closure',
+	// 	manager.add_query_filter('evidence_subset_closure_label',
 	// 				 'experimental evidence');
 	// 	manager.add_query_filter('aspect', aspect);
 
@@ -294,11 +294,11 @@ function second_pass(){
 	// 	    sea[src][aspect] = resp.total_documents();
 	// 	    // console.log(glob);
 	// 	});
-		
+
 	// 	return manager.search();
 	//     });
 	// });
-	
+
 	// Experimental publications.
 	// publications.assigners_with_exp : {},
 	glob_funs.push(function(){
@@ -306,7 +306,7 @@ function second_pass(){
 	    //  Minimal, only want count.
 	    var manager = _new_facets_manager_by_personality('annotation');
 	    manager.add_query_filter('assigned_by', src);
-	    manager.add_query_filter('evidence_type_closure',
+	    manager.add_query_filter('evidence_subset_closure_label',
 				     'experimental evidence');
 	    manager.facets('reference');
 
@@ -320,27 +320,27 @@ function second_pass(){
 		    var count = datum[1];
 		    ref_count += count;
 		});
-		
+
 		glob['publications']['assigners_with_exp'][src] = ref_count;
 		// console.log(glob);
 	    });
 
 	    return manager.search();
 	});
-	
+
 	// // Publications by aspect.
 	// // publications.assigners_by_aspect : {},
 	// each(['P', 'F', 'C'], function(aspect){
 
 	//     glob_funs.push(function(){
-		
+
 	// 	//  Minimal, only want count.
 	// 	var manager = _new_facets_manager_by_personality('annotation');
 	// 	manager.add_query_filter('assigned_by', src);
 	// 	manager.add_query_filter('aspect', aspect);
-		
+
 	// 	manager.register('search', function(resp){
-		    
+
 	// 	    // Extract the facet.
 	// 	    var ref_facet = resp.facet_field('reference') || [];
 	// 	    //console.log('raw_data', raw_data);
@@ -349,15 +349,15 @@ function second_pass(){
 	// 		var count = datum[1];
 	// 		ref_count += count;
 	// 	    });
-		    
+
 	// 	    glob['publications']['assigners_by_aspect'][src] = ref_count;
 	// 	    // console.log(glob);
 	// 	});
-		
+
 	// 	return manager.search();
 	//     });
 	// });
-	
+
     });
 
     // Looking by species.
@@ -372,7 +372,7 @@ function second_pass(){
 	    //  Minimal, only want count.
 	    var manager = _new_totals_manager_by_personality('annotation');
 	    manager.add_query_filter('taxon_closure', 'NCBITaxon:' + sid);
-	    manager.add_query_filter('evidence_type_closure',
+	    manager.add_query_filter('evidence_subset_closure_label',
 				     'experimental evidence');
 
 	    manager.register('search', function(resp){
@@ -383,14 +383,14 @@ function second_pass(){
 
 	    return manager.search();
 	});
-	
+
 	// Non-experimental.
 	glob_funs.push(function(){
 
 	    //  Minimal, only want count.
 	    var manager = _new_totals_manager_by_personality('annotation');
 	    manager.add_query_filter('taxon_closure', 'NCBITaxon:' + sid);
-	    manager.add_query_filter('evidence_type_closure',
+	    manager.add_query_filter('evidence_subset_closure_label',
 				     'experimental evidence', ['-']);
 
 	    manager.register('search', function(resp){
@@ -401,14 +401,13 @@ function second_pass(){
 
 	    return manager.search();
 	});
-	
+
 	// Okay, a little deeper here. We're going to grab aspect as
 	// well.
 	// glob['annotation']['species_by_aspect_by_evidence'] : {},
 	each(our_evidence_of_interest, function(ev){
 
 	    each(['P', 'F', 'C', 'T', 'A', 'E', 'G'], function(aspect){
-		
 		glob_funs.push(function(){
 
 		    //  Minimal, only want count.
@@ -416,8 +415,8 @@ function second_pass(){
 			    _new_totals_manager_by_personality('annotation');
 		    manager.add_query_filter('taxon_closure', 'NCBITaxon:' + sid);
 		    manager.add_query_filter('aspect', aspect);
-		    manager.add_query_filter('evidence_type_closure', ev);
-		    
+		    manager.add_query_filter('evidence_subset_closure_label', ev);
+
 		    manager.register('search', function(resp){
 
 			// Ensure.
@@ -429,17 +428,17 @@ function second_pass(){
 			if( typeof(gas[sid][ev]) === 'undefined' ){
 			    gas[sid][ev] = {};
 			}
-			
+
 			// Finally, add.
 			gas[sid][ev][aspect] = resp.total_documents();
 		    });
-		    
+
 		    return manager.search();
 		});
-		
+
 	    });
 	});
-	
+
     });
 
     // Looking by evidence.
@@ -450,7 +449,7 @@ function second_pass(){
 
 	    var manager = _new_totals_manager_by_personality('annotation');
 	    //  Minimal, only want count.
-	    manager.add_query_filter('evidence_type_closure', ev);
+	    manager.add_query_filter('evidence_subset_closure_label', ev);
 
 	    manager.register('search', function(resp){
 		glob['annotations']['evidence'][ev] =
@@ -459,7 +458,7 @@ function second_pass(){
 
 	    return manager.search();
 	});
-	
+
     });
 
     ///
