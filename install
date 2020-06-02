@@ -323,7 +323,8 @@ ll("Created AmiGO JavaScript meta file: \"$amigo_env_fname\".");
 
 ## Roll JS out to the server environment in a b-flag situation.
 my $xrefs_js_data_fname = 'javascript/npm/amigo2-instance-data/lib/data/xrefs.js';
-my $xrefs_url = 'https://raw.githubusercontent.com/geneontology/go-site/master/metadata/db-xrefs.yaml';
+#my $xrefs_url = 'https://raw.githubusercontent.com/geneontology/go-site/master/metadata/db-xrefs.yaml';
+my $xrefs_url = 'https://raw.githubusercontent.com/Planteome/go-site-xrefs-fork/master/metadata/db-xrefs.yaml';
 xref_abbs_to_meta_js($xrefs_js_data_fname, $xrefs_url, 'js');
 ll("Created GO XRefs JavaScript data file: \"$xrefs_js_data_fname\".");
 
@@ -419,7 +420,8 @@ if( ! $opt_b ){
 
   ## Roll perl out to the server environment in a non-b-flag situation.
   my $xrefs_json_data_fname = $env_conf{AMIGO_DYNAMIC_PATH} . '/xrefs.json';
-  my $xrefs_url = 'https://raw.githubusercontent.com/geneontology/go-site/master/metadata/db-xrefs.yaml';
+  #my $xrefs_url = 'https://raw.githubusercontent.com/geneontology/go-site/master/metadata/db-xrefs.yaml';
+  my $xrefs_url = 'https://raw.githubusercontent.com/Planteome/go-site-xrefs-fork/master/metadata/db-xrefs.yaml';
   xref_abbs_to_meta_js($xrefs_json_data_fname, $xrefs_url, 'json');
   ll("Created GO XRefs JSON data file: \"$xrefs_json_data_fname\".");
 
