@@ -1124,13 +1124,20 @@ app.all('/api/disambiguation/bioentity', function (req, res){
 
 	    // Break out the two parts of the species cache.
 	    var doc_lookup = cache['documents'];
-	    var str_refs = cache['references'];
+	    var str_refs_tmp = cache['references'];
+	    var key, keys = Object.keys(str_refs_tmp);
+	    var n = keys.length;
+	    var str_refs={};
+	    while (n--) {
+		key = keys[n];
+		str_refs[key.toUpperCase()] = str_refs_tmp[key];
+		}
 
 	    // Comb through the cache, carefully, and get the results
 	    // that we can. First, for each of the entities try and
 	    // pull out the right fields.
 	    us.each(entities, function(entity){
-
+		entity = entity.toUpperCase();
 		var entity_hits = [];
 
 		// Check to see if we can find any document references
@@ -1162,7 +1169,7 @@ app.all('/api/disambiguation/bioentity', function (req, res){
 
 				    // Record that we found the exact
 				    // match we want.
-				    if( entity === val ){
+				    if( entity === val.toUpperCase() ){
 					entity_hits.push({
 					    "id": match_proxy_id,
 					    "matched": search_field
