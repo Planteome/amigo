@@ -305,7 +305,7 @@ function _client_compile_task(file) {
     var b = browserify(infile);
     return b
     // not in npm, don't need in browser
-	.exclude('ringo/httpclient')
+	//.exclude('ringo/httpclient')
 	.bundle()
     // desired output filename to vinyl-source-stream
 	.pipe(source(file))
