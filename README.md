@@ -14,6 +14,8 @@
 The main installation information is available
 [on the wiki](http://wiki.geneontology.org/index.php/AmiGO_2_Manual:_Installation).
 
+Planteome specific instructions for installing on a fresh OS if access to palea is available is at [Planteome_Amigo_install](Planteome_AmiGO_install.md)
+
 # Jenkins (example)
 
 ## Loading
