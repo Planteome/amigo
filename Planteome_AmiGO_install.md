@@ -20,7 +20,7 @@ These instructions assume a RHEL/Rocky "dnf"/rpm OS. Packages and install instru
 
     > /usr/bin/npm config set prefix /usr/local
 
-    > /usr/bin/npnm install -g npm@6.10.0
+    > /usr/bin/npn install -g npm@6.10.0
 
     > npm install -g node@11.15.0
 
