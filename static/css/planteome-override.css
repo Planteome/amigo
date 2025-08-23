@@ -99,6 +99,11 @@ color: '#4e5679';
   background-color: #f7d3a2;
   color: #05F;
 }
+.btn-secondary {
+  background-color: #6495ed;
+  color: #fff;
+  border-color: #c0c0c0;
+}
 /* Large box belowe header on landing page */
 .jumbotron {
   background-color: #fdebdb;
