@@ -31,6 +31,7 @@ var handler = amigo.handler;
 var jquery_engine = require('bbop-rest-manager').jquery;
 var golr_manager = require('bbop-manager-golr');
 var golr_response = require('bbop-response-golr');
+var rest_response = require('bbop-rest-response').json;
 
 // Aliases.
 var dlimit = defs.download_limit;
@@ -41,7 +42,7 @@ function GPDetailsInit(){
     // Logger.
     var logger = new bbop.logger();
     logger.DEBUG = true;
-    function ll(str){ logger.kvetch('GP: ' + str); }    
+    function ll(str){ logger.kvetch('GP: ' + str); }
 
     ll('');
     ll('GPDetails.js');
@@ -53,21 +54,25 @@ function GPDetailsInit(){
 
     // Tabify the layout if we can (may be in a non-tabby version).
     var dtabs = jQuery("#display-tabs");
-    if( dtabs ){
-	ll('Apply tabs...');
-	jQuery("#display-tabs").tabs();
-	jQuery("#display-tabs").tabs('option', 'active', 0);
+    if (dtabs) {
+        ll('Apply tabs...');
+        var fragname = window.location && window.location.hash
+        if (fragname && fragname !== "#") {
+            jQuery('#display-tabs a[href="' + fragname + '"]').tab('show');
+        } else {
+            jQuery("#display-tabs a:first").tab('show');
+        }
     }
-    
+
     ///
     /// Manager setup.
     ///
-    
+
     var engine = new jquery_engine(golr_response);
     engine.method('GET');
     engine.use_jsonp(true);
     var gps = new golr_manager(gserv, gconf, engine, 'async');
-    
+
     var confc = gconf.get_class('annotation');
 
     // // Setup the annotation profile and make the annotation document
@@ -85,6 +90,10 @@ function GPDetailsInit(){
     // Set the manager profile.
     gps.set_personality('annotation'); // profile in gconf
     gps.include_highlighting(true);
+
+    // For #724.
+    //gps.set('sort', 'evidence_type asc');
+    gps.set('bq', 'evidence_type:IBA^1000');
 
     // Two sticky filters.
     gps.add_query_filter('document_category', 'annotation', ['*']);
@@ -128,10 +137,10 @@ function GPDetailsInit(){
 	results_title: 'Total annotations:&nbsp;',
     };
     var pager = new widgets.live_pager('pager', gps, pager_opts);
-    
+
     // Attach the results pane and download buttons to manager.
     var default_fields = confc.field_order_by_weight('result');
-    var btmpl = widgets.display.button_templates;    
+    var btmpl = widgets.display.button_templates;
     var flex_download_button = btmpl.flexible_download_b3(
 	'Download <small>(up to ' + dlimit + ')</small>',
 	dlimit,
@@ -184,7 +193,7 @@ function GPDetailsInit(){
 	jQuery('#prob_ann_href').attr('href', lurl);
 	jQuery('#prob_ann').removeClass('hidden');
     })();
-    
+
     // Get bookmark for annotation download.
     (function(){
 	// Ready bookmark.
@@ -192,7 +201,7 @@ function GPDetailsInit(){
 	engine.method('GET');
 	engine.use_jsonp(true);
 	var man = new golr_manager(gserv, gconf, engine, 'async');
-	
+
 	man.set_personality('annotation');
 	man.add_query_filter('document_category', 'annotation', ['*']);
 	man.add_query_filter('bioentity', global_acc);
@@ -204,6 +213,80 @@ function GPDetailsInit(){
 	jQuery('#prob_ann_dl_href').attr('href', dstate);
 	jQuery('#prob_ann_dl').removeClass('hidden');
     })();
+
+    // Begin Models tab setup
+    var gocam_select = jQuery('#gomodel-select');
+    var gocam_select_group = jQuery('#gomodel-select-group');
+    var gocam_viewer_container = jQuery('#gp-gocam-viewer-container');
+    var gocam_viewer_el = null;
+    var gocam_no_data_message = jQuery('#gocam-no-data-message');
+    var gocam_fetch_error_message = jQuery('#gocam-fetch-error-message');
+    var models_tab = jQuery('a[href=#display-models-tab]');
+    var models_tab_title = 'GO-CAMs';
+
+    // When the model select box changes, inform the go-cam widget of the new
+    // model ID.
+    gocam_select.on('change', function () {
+        var model_id = jQuery(this).val();
+        gocam_viewer_el.setAttribute('gocam-id', model_id);
+    });
+
+    dtabs.on('shown.bs.tab', function (event) {
+        // The user has clicked on the Models tab and the go-gocam-viewer widget has
+        // not been set up yet (probably because this is the first time they've
+        // viewed the tab). Initializing the widget is deferred until this point
+        // because initializing it in a hidden element leads to a funky first render.
+        if ($(event.target).attr('href') === '#display-models-tab' && !gocam_viewer_el) {
+            var model_id = gocam_select.val();
+            gocam_viewer_el = document.createElement('go-gocam-viewer');
+            gocam_viewer_el.setAttribute('gocam-id', model_id);
+            gocam_viewer_el.setAttribute('show-legend', 'false');
+            gocam_viewer_container.prepend(gocam_viewer_el);
+        }
+    });
+    var gocam_fetch_engine = new jquery_engine(rest_response);
+    // If the request to get models for this GP fails, show an error message
+    // and ensure the model selector, go-cam widget, and "no data" message are
+    // all hidden.
+    gocam_fetch_engine.register('error', function () {
+        gocam_fetch_error_message.removeClass('hidden');
+        gocam_no_data_message.addClass('hidden');
+        gocam_select_group.addClass('hidden');
+        gocam_viewer_container.addClass('hidden');
+        models_tab.text(models_tab_title);
+    });
+
+    // When we successfully retrieve a list of models ensure the error message
+    // is hidden. Then if there are models in the response, populate the select
+    // box with those models as options. If there were no models in the response
+    // show the "no data" message instead of the select box.
+    gocam_fetch_engine.register('success', function (resp) {
+        gocam_fetch_error_message.addClass('hidden');
+        gocam_select.empty();
+        var models = resp.raw();
+        models_tab.text(`${models_tab_title} (${models.length})`);
+        if (models && models.length > 0) {
+            gocam_no_data_message.addClass('hidden');
+            gocam_select_group.removeClass('hidden');
+            gocam_viewer_container.removeClass('hidden');
+            models.forEach(function (model) {
+                gocam_select.append(`<option value=${model.gocam.replace("http://model.geneontology.org/", "")}>${model.title}</option>`);
+            });
+        } else {
+            gocam_no_data_message.removeClass('hidden');
+            gocam_select_group.addClass('hidden');
+            gocam_viewer_container.addClass('hidden');
+        }
+    });
+
+    // Initiate the request to get list of models for the GP
+    var base = process.env.GO_API_URL;
+    var endpoint = `/api/gp/${global_acc}/models`;
+    var query = {
+        'causalmf': '2',
+    };
+    gocam_fetch_engine.start(base + endpoint, query, 'GET');
+    models_tab.text(`${models_tab_title} (pending...)`);
 
     //
     ll('GPDetailsInit done.');

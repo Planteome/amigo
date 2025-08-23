@@ -953,7 +953,7 @@ sub _common_params_settings {
   $params->{interlink_rte} =
     #$self->{CORE}->get_interlink({mode=>'rte'});
     ## Temporary fix for: https://github.com/geneontology/amigo/issues/198
-    'http://pantherdb.org/webservices/go/overrep.jsp';
+    'https://pantherdb.org/webservices/go/overrep.jsp';
   ## Since there is no default search page, arrange for one.
   # my $def_search = $self->{CORE}->get_amigo_search_default();
   # $params->{interlink_search_default} =
@@ -1666,7 +1666,8 @@ sub mode_generic_message {
 ## Catching mode errors through fatal.
 sub mode_exception {
   my $self = shift;
-  my $intended_runmode = shift;
+  my $intended_runmode = shift || '';
+  $intended_runmode = $self->{OUTPUT_SANITIZER}->encode($intended_runmode);
   return $self->mode_fatal("Looking for run mode \"$intended_runmode\", but found no such method.");
 }
 

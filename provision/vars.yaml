@@ -1,0 +1,70 @@
+---
+###############
+# Point stage_dir to a different locatiom. By default it will reside in the current directory.
+##############
+stage_dir: "{{ lookup('env', 'PWD') }}/stage_dir"
+branch: master
+repo: https://github.com/geneontology/amigo.git
+repo_dir: '{{ stage_dir }}/amigo'
+
+########
+# IN PROD MODE we do not mount the repo directory
+PROD_MODE: 0 
+
+#########
+# apache proxy image
+############
+amigo_image: go-amigo:latest
+apache_proxy_image: geneontology/apache-proxy:v1
+
+# If False download index otherwise create it
+CREATE_INDEX: False 
+
+# For downloading index archive
+golr_index_archive_url: http://current.geneontology.org/products/solr/golr-index-contents.tgz
+golr_timestamp: http://current.geneontology.org/products/solr/golr_timestamp.log
+release_archive_doi: http://current.geneontology.org/metadata/release-archive-doi.json
+
+########
+# For creating Solr index. Change these accordingly.
+#######`
+GOLR_SOLR_MEMORY: 4G
+GOLR_LOADER_MEMORY: 7G
+GOLR_INPUT_ONTOLOGIES: "http://skyhook.berkeleybop.org/release/ontology/extensions/go-gaf.owl 
+                        http://skyhook.berkeleybop.org/release/ontology/extensions/gorel.owl" 
+
+GOLR_INPUT_GAFS: "http://current.geneontology.org/annotations/aspgd.gaf.gz
+                 http://skyhook.berkeleybop.org/release/annotations/cgd.gaf.gz"
+                  
+####
+#
+GO_API_URL: ""
+########
+# For logrotate to s3 bucket
+#######`
+USE_S3: 1
+S3_PATH: amigo 
+S3_CRED_FILE: REPLACE_ME
+S3_BUCKET: REPLACE_ME
+###
+# SSL SUPPORT
+###
+USE_SSL: 0
+S3_SSL_CERTS_LOCATION: REPLACE_ME
+
+
+########
+# For golr monit and jetty.  
+#######`
+LOAD_AVG: 3
+JETTY_RETAIN_LOGS_IN_DAYS: 30
+
+#####
+AMIGO_DYNAMIC: amigo.example.com
+AMIGO_DYNAMIC_ALIAS: amigo.example.com
+AMIGO_PUBLIC_GOLR: amigo-golr.example.com
+AMIGO_PUBLIC_GOLR_ALIAS: amigo-golr.example.com
+AMIGO_PUBLIC_GOLR_BULK: '{{ AMIGO_PUBLIC_GOLR }}'
+
+##
+USE_CLOUDFLARE: 0

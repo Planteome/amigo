@@ -27,6 +27,7 @@ use CGI::Application::Plugin::Redirect;
 use AmiGO::Worker::GOlr::Term;
 use AmiGO::Worker::GOlr::GeneProduct;
 use AmiGO::Worker::GOlr::ModelAnnotation;
+use AmiGO::External::JSON;
 use AmiGO::External::QuickGO::Term;
 use AmiGO::External::XML::GONUTS;
 #use AmiGO::External::Raw;
@@ -75,8 +76,8 @@ sub setup {
 		   'gene_product'        => 'mode_gene_product_details',
 		   'reference'           => 'mode_reference_details',
 		   'model'               => 'mode_model_details',
-		   'biology'             => 'mode_model_biology',
-		   'ontologies'          => 'mode_ontologies',
+		   #'biology'             => 'mode_model_biology',
+		   #'ontologies'          => 'mode_ontologies',
 		   'software_list'       => 'mode_software_list',
 		   'schema_details'      => 'mode_schema_details',
 		   'load_details'        => 'mode_load_details',
@@ -697,7 +698,7 @@ sub mode_medial_search {
   $params->{q} = $self->param('q')
     if ! $params->{q} && $self->param('q');
   $self->{CORE}->kvetch(Dumper($params));
-  my $q = $params->{q};
+  my $q = $self->{OUTPUT_SANITIZER}->encode($params->{q}) || '';
 
   ## Pull our query parameter.
   if( ! defined $q || $q eq '' ){
@@ -1136,6 +1137,27 @@ sub mode_search {
   $pins = [$pins] if ref($pins) ne 'ARRAY';
   $filters = [$filters] if ref($filters) ne 'ARRAY';
 
+  ## Sanitize the array inputs a little to prevent HTML injection in
+  ## this one case. Also see html_safe in AmiGO.pm.
+  my $clean_filters = [];
+  foreach my $ci (@$filters){
+    $ci =~ s/</&lt;/gso;
+    $ci =~ s/>/&gt;/gso;
+    push @$clean_filters, $ci
+  }
+  $filters = $clean_filters;
+  ## And the pins.
+  my $clean_pins = [];
+  foreach my $ci (@$pins){
+    $ci =~ s/</&lt;/gso;
+    $ci =~ s/>/&gt;/gso;
+    push @$clean_pins, $ci
+  }
+  $pins = $clean_pins;
+  ## And the bookmarks itself (#622).
+  $bookmark =~ s/</&lt;/gso;
+  $bookmark =~ s/>/&gt;/gso;
+
   ## Now add the filters that come in from the YAML-defined simple
   ## public bookmarking API.
   $filters = $self->_add_search_bookmark_api_to_filters($params, $filters);
@@ -1400,6 +1422,13 @@ sub mode_term_details {
   my $input_term_id = $params->{cls};
   my $input_format = $params->{format} || 'html';
 
+  ## Get the standard default relation that we're going to be
+  ## using. Default the default to 'isa_partof'.
+  $params->{relation} = $self->param('relation')
+    if ! $params->{relation} && $self->param('relation');
+  my $default_relation = $params->{relation} || 'isa_partof';
+  $self->set_template_parameter('DEFAULT_RELATION', $default_relation);
+
   ## Optional RESTmark input for embedded search_pane--external
   ## version.
   my $query = $params->{q} || '';
@@ -1560,6 +1589,60 @@ sub mode_term_details {
   $self->set_template_parameter('NEIGHBORHOOD_INFO', $nay_info);
 
   ###
+  ### Taxon constraints.
+  ###
+
+  my $tc = [];
+  foreach my $parent (@{$nay_info->{parents}}){
+    if( $parent->{acc} =~ /^NCBITaxon/ ){
+
+      ## Use the general abbs linker.
+      my $tlink = undef;
+      my($cdb, $ckey) = $self->{CORE}->split_gene_product_acc($parent->{acc});
+      my $link_try = $self->{CORE}->database_link($cdb, $ckey);
+      if( $link_try ){
+	$tlink = $link_try;
+      }
+
+      push @$tc,
+	{
+	 taxon_rel_acc => $parent->{rel},
+	 taxon_name => $parent->{name},
+	 taxon_acc => $parent->{acc},
+	 taxon_link => $tlink
+	};
+    }
+  }
+  $self->set_template_parameter('TAXON_CONSTRAINTS', $tc);
+
+  ###
+  ### Chemical reaction participants.
+  ###
+
+  my $crp = [];
+  foreach my $parent (@{$nay_info->{parents}}){
+    if( $parent->{rel} eq 'RO:0000057' ){
+
+      ## Use the general abbs linker.
+      my $tlink = undef;
+      my($cdb, $ckey) = $self->{CORE}->split_gene_product_acc($parent->{acc});
+      my $link_try = $self->{CORE}->database_link($cdb, $ckey);
+      if( $link_try ){
+	$tlink = $link_try;
+      }
+
+      push @$crp,
+	{
+	 crp_rel_acc => $parent->{rel},
+	 crp_name => $parent->{name},
+	 crp_acc => $parent->{acc},
+	 crp_link => $tlink
+	};
+    }
+  }
+  $self->set_template_parameter('CHEMICAL_REACTION_PARTICIPANTS', $crp);
+
+  ###
   ### Bridge variables from old system.
   ###
 
@@ -1693,7 +1776,8 @@ sub mode_term_details {
       $self->{JS}->make_var('global_live_search_pins', $pins),
       $self->{JS}->make_var('global_label',
 			    $term_info_hash->{$input_term_id}{'name'}),
-      $self->{JS}->make_var('global_acc', $input_term_id)
+      $self->{JS}->make_var('global_acc', $input_term_id),
+      $self->{JS}->make_var('global_default_relation', $default_relation)
      ],
      content =>
      [
@@ -1773,6 +1857,14 @@ sub mode_gene_product_details {
     return $jdump;
   }
 
+  ## PAN-GO and Functionome information setup.
+  $self->set_template_parameter('functionome_p', 'no');
+  if( $input_gp_id =~ /^UniProt/ ){
+    if( $gp_info_hash->{$input_gp_id}{'taxon_readable'} eq 'Homo sapiens' ){
+      $self->set_template_parameter('functionome_p', 'yes');
+    }
+  }
+
   ## PANTHER info if there.
   my $pgraph = $gp_info_hash->{$input_gp_id}{'phylo_graph'};
   if( $pgraph ){
@@ -1830,6 +1922,7 @@ sub mode_gene_product_details {
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
+      $self->{JS}->get_lib('GOCAMWidgetLoader.js'),
       $self->{JS}->get_lib('GPDetails.js'),
       # $self->{JS}->make_var('global_count_data', $gpc_info),
       # $self->{JS}->make_var('global_rand_to_acc', $rand_to_acc),
@@ -1881,37 +1974,43 @@ sub mode_reference_details {
   ## public bookmarking API.
   $filters = $self->_add_search_bookmark_api_to_filters($params, $filters);
 
+  ## Normalize on PMID:123456 if 123456.
+  if( $input_ref_id =~ /^[0-9]{1,100}$/ ){
+      $input_ref_id = 'PMID:' . $input_ref_id;
+  }
+
   ## Input sanity check.
-  if( $input_ref_id =~ /^pmid\:[0-9]{1,100}/ ){
-    return $self->mode_fatal("Please use a PubMed ID of the form: <b>PMID:123456</b>.");
-  }elsif( $input_ref_id !~ /^PMID\:[0-9]{1,100}/ ){
-
-    ## Warning: this is essientially, except for the action, copied
-    ## out of reference_details.tmpl. Make sure they stay in sync.
-    my $form =
-      [
-       '<form action="/amigo/reference"',
-       'id="reference-query-form"',
-       'class="form-inline"',
-       'role="search"',
-       'method="GET">',
-       '<div class="form-group">',
-       '<input',
-       'type="text"',
-       'title="Input any PubMed ID (e.g. PMID:123456)."',
-       'class="form-control"',
-       'name="ref_id"',
-       'placeholder="E.g. PMID:123456"',
-       'value=""',
-       'id="reference-search-query">',
-       '</div>',
-       '<button type="submit"',
-       'title="Search for groups of documents with the inputted text."',
-       'class="btn btn-default">Search</button>',
-       '</form>'
-      ];
-
-    return $self->mode_fatal("Your input is not a PubMed ID. Please try again:<br /><br />" . join(' ', @$form));
+  if( $input_ref_id =~ /^pmid\:[0-9]{1,100}$/ ){
+    return $self->mode_fatal("Please use a PubMed ID of the form: PMID:123456.");
+  }elsif( $input_ref_id !~ /^PMID\:[0-9]{1,100}$/ ){
+    return $self->mode_fatal("Please use a PubMed ID of the form: PMID:123456.");
+    ## I don't know if this was the original spec, but it has been functionally
+    ## inactive for some time with the safe HTML in error.html.
+    # ## Warning: this is essientially, except for the action, copied
+    # ## out of reference_details.tmpl. Make sure they stay in sync.
+    # my $form =
+    #   [
+    #    '<form action="/amigo/reference"',
+    #    'id="reference-query-form"',
+    #    'class="form-inline"',
+    #    'role="search"',
+    #    'method="GET">',
+    #    '<div class="form-group">',
+    #    '<input',
+    #    'type="text"',
+    #    'title="Input any PubMed ID (e.g. PMID:123456)."',
+    #    'class="form-control"',
+    #    'name="ref_id"',
+    #    'placeholder="E.g. PMID:123456"',
+    #    'value=""',
+    #    'id="reference-search-query">',
+    #    '</div>',
+    #    '<button type="submit"',
+    #    'title="Search for groups of documents with the inputted text."',
+    #    'class="btn btn-default">Search</button>',
+    #    '</form>'
+    #   ];
+    # return $self->mode_fatal("Your input is not a PubMed ID. Please try again:<br /><br />" . join(' ', @$form));
   }
   if( ! $input_ref_id ){
     return $self->mode_fatal("No input reference identifier argument.");
@@ -2010,27 +2109,43 @@ sub mode_model_details {
     return $self->mode_fatal("No input model annotation argument.");
   }
 
-  ## Warn people away for now.
-  $self->add_mq('warning',
-		'This page is considered <strong>ALPHA</strong> software.');
+  ## ALPHA warning removed
+  # No longer displaying ALPHA banner
 
   ###
   ### Get full info.
   ###
 
-  ## Get the data from the store.
-  my $ma_worker = AmiGO::Worker::GOlr::ModelAnnotation->new($input_id);
-  my $ma_info_hash = $ma_worker->get_info();
+  ## Get the data from external API.
+  my $json_worker = AmiGO::External::JSON->new();
+  my $external_request_url = $self->{CORE}->amigo_env('GO_API_URL') . "/api/go-cam/$input_id";
+  $json_worker->get_external_data($external_request_url);
+  my $response = $json_worker->try();
 
   ## First make sure that things are defined.
-  if ( ! defined($ma_info_hash) ||
-       $self->{CORE}->empty_hash_p($ma_info_hash) ||
-       ! defined($ma_info_hash->{$input_id}) ) {
+  if ( ! defined($response) ||
+       $self->{CORE}->empty_hash_p($response) ) {
     return $self->mode_not_found($input_id, 'model');
   }
 
-  $self->{CORE}->kvetch('solr docs: ' . Dumper($ma_info_hash));
-  $self->set_template_parameter('MA_INFO', $ma_info_hash->{$input_id});
+  my $ma_info_hash;
+  $ma_info_hash->{'model_id'} = $response->{'id'};
+  my $model_annotations = $response->{'annotations'};
+  foreach my $annotation (@$model_annotations) {
+    if ( $annotation->{'key'} eq 'title' ) {
+      $ma_info_hash->{'model_label'} = $annotation->{'value'};
+    } elsif ( $annotation->{'key'} eq 'state' ) {
+      $ma_info_hash->{'model_state'} = $annotation->{'value'};
+    } elsif ( $annotation->{'key'} eq 'wasDerivedFrom' ) {
+      $ma_info_hash->{'derived_from_id'} = $annotation->{'value'};
+      $ma_info_hash->{'derived_from_link'} = $self->{CORE}->get_interlink({mode => 'model_details',
+          arg => {acc=>$annotation->{'value'}}});
+    }
+  }
+
+  $self->{CORE}->kvetch('model info: ' . Dumper($ma_info_hash));
+  $self->set_template_parameter('MA_INFO', $ma_info_hash);
+  $self->set_template_parameter('GOCAM_DATA', $self->{CORE}->_write_json_string($response));
 
   ###
   ### Standard setup.
@@ -2048,15 +2163,15 @@ sub mode_model_details {
 
   ## Figure out the best title we can.
   my $best_title = $input_id;	# start with the worst
-  if ( $ma_info_hash->{$input_id}{'model_label'} ) {
-    $best_title = $ma_info_hash->{$input_id}{'model_label'};
+  if ( $ma_info_hash->{'model_label'} ) {
+    $best_title = $ma_info_hash->{'model_label'};
   }
   $self->set_template_parameter('page_content_title', $best_title);
 
   ## Extract the string representation of the model.
   my $model_json = undef;
-  if ( $ma_info_hash->{$input_id}{'model_graph'} ) {
-    my $model_annotation_string = $ma_info_hash->{$input_id}{'model_graph'};
+  if ( $ma_info_hash->{'model_graph'} ) {
+    my $model_annotation_string = $ma_info_hash->{'model_graph'};
     $model_json = $self->{CORE}->_read_json_string($model_annotation_string);
   }
   ## Because of the round-tripping, it's possible to have information,
@@ -2071,20 +2186,14 @@ sub mode_model_details {
   ## revisit later on.
   my $github_base =
     'https://github.com/geneontology/noctua-models/blob/master/models/';
-  my $noctua_base = $self->{WEBAPP_TEMPLATE_PARAMS}{noctua_base};
-  my $editor_base = $noctua_base . 'editor/graph/';
-  my $viewer_base = $noctua_base . 'workbench/cytoview/';
+  my $github_file_ext = '.ttl';
   ## We need to translate some of the document information.
   ## TODO/BUG: This is temporary as we work out what we'll actually have.
   my @s = split(':', $input_id);
   my $fid = $s[scalar(@s) -1];
   ##
-  my $repo_file_url = $github_base . $fid;
-  my $edit_file_url = $editor_base . $input_id;
-  my $view_file_url = $viewer_base . $input_id;
+  my $repo_file_url = $github_base . $fid . $github_file_ext;
   $self->set_template_parameter('repo_file_url', $repo_file_url);
-  $self->set_template_parameter('edit_file_url', $edit_file_url);
-  $self->set_template_parameter('view_file_url', $view_file_url);
 
   ## Our AmiGO services CSS.
   my $prep =
@@ -2106,8 +2215,8 @@ sub mode_model_details {
      javascript =>
      [
       $self->{JS}->get_lib('GeneralSearchForwarding.js'),
-      #$self->{JS}->get_lib('ModelDetails.js'),
-      $self->{JS}->get_lib('AmiGOCytoView.js'),
+      $self->{JS}->get_lib('GOCAMWidgetLoader.js'),
+      $self->{JS}->get_lib('ModelDetails.js'),
       ## Things to make AmiGOCytoView.js work. HACKY! TODO/BUG
       $self->{JS}->make_var('global_id', $input_id),
       ## TODO: get load to have same as wire protocol.
@@ -2141,9 +2250,8 @@ sub mode_model_biology {
 
   my $self = shift;
 
-  ## Warn people away for now.
-  $self->add_mq('warning',
-		'This page is considered <strong>ALPHA</strong> software.');
+  ## ALPHA warning removed
+  # No longer displaying ALPHA banner
 
   ###
   ### Standard setup.
@@ -2206,9 +2314,8 @@ sub mode_ontologies {
 
   my $self = shift;
 
-  ## Warn people away for now.
-  $self->add_mq('warning',
-		'This page is considered <strong>ALPHA</strong> software.');
+  ## ALPHA warning removed
+  # No longer displaying ALPHA banner
 
   ###
   ### Standard setup.

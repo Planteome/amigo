@@ -121,19 +121,6 @@ fields:
     cardinality: multi
     property: []
     searchable: true
-  - id: isa_partof_closure
-    description: "Annotations for this term or its children (over is_a/part_of)."
-    display_name: Involved in
-    type: string
-    cardinality: multi
-    property: []
-  - id: isa_partof_closure_label
-    description: "Annotations for this term or its children (over is_a/part_of)."
-    display_name: Involved in
-    type: string
-    cardinality: multi
-    property: []
-    searchable: true
   - id: regulates_closure
     description: "Annotations for this term or its children (over regulates)."
     display_name: Inferred annotation
@@ -143,6 +130,19 @@ fields:
   - id: regulates_closure_label
     description: "Annotations for this term or its children (over regulates)."
     display_name: Inferred annotation
+    type: string
+    cardinality: multi
+    property: []
+    searchable: true
+  - id: isa_partof_closure
+    description: "Annotations for this term or its children (over is_a/part_of)."
+    display_name: GO class (excluding "regulates")
+    type: string
+    cardinality: multi
+    property: []
+  - id: isa_partof_closure_label
+    description: "Annotations for this term or its children (over is_a/part_of)."
+    display_name: GO class (excluding "regulates")
     type: string
     cardinality: multi
     property: []

@@ -70,3 +70,25 @@ tramp
 
 ## Would rather not have the minimal java stuff pollute.
 *.class
+
+
+stage_dir
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+
+s3cfg
+backend.tf
+go-ssh
+go-ssh.pub
+production-vars.txt
+config.yaml
+production-*.cfg
+production-*.tfvars.json
+config-instance.yaml
+config-stack.yaml
+amigo-hash
+
+.idea
+.env

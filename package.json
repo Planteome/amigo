@@ -1,6 +1,6 @@
 {
   "name": "amigo2",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "license": "BSD-3-Clause",
   "description": "AmiGO 2: Your friend in the Gene Ontology.",
   "keywords": [
@@ -22,11 +22,12 @@
     "npm": ">= 5.6.0"
   },
   "dependencies": {
+    "@geneontology/web-components": "0.2.0",
     "bbop": "2.4.3",
-    "bbop-core": "0.0.5",
+    "bbop-core": "0.0.6",
     "bbop-graph": "0.0.19",
     "bbop-graph-noctua": "0.0.32",
-    "bbop-manager-golr": "0.0.12",
+    "bbop-manager-golr": "0.0.13",
     "bbop-manager-minerva": "0.0.15",
     "bbop-response-barista": "0.0.9",
     "bbop-response-golr": "0.0.8",
@@ -43,20 +44,15 @@
     "expand-home-dir": "0.0.3",
     "express": "4.16.3",
     "golr-conf": "0.0.3",
-    "graceful-fs": "^4.2.10",
-    "gulp": "^3.9.1",
     "jquery": "3.3.1",
     "jxon": "2.0.0-beta.5",
     "markdown": "0.5.0",
     "marked": "0.3.19",
     "minerva-requests": "0.0.15",
-    "minimatch": "^3.0.2",
     "minimist": "1.2.0",
     "mustache": "2.3.0",
-    "node-gyp": "^5.0.5",
-    "orchestrator": "^0.3.8",
     "plotly.js": "1.35.2",
-    "popper.js": "^1.16.1",
+    "popper.js": "^1.12.9",
     "pup-tent": "0.9.10",
     "request": "2.85.0",
     "solr-client": "0.7.0",
@@ -66,17 +62,17 @@
     "yamljs": "0.3.0"
   },
   "devDependencies": {
-    "browserify": "^2.36.1",
+    "@babel/core": "^7.21.3",
+    "@babel/preset-env": "^7.20.2",
+    "babelify": "^10.0.0",
+    "browserify": "^16.1.1",
+    "browserify-css": "^0.15.0",
     "browserify-shim": "^3.8.6",
     "chai": "^4.1.2",
+    "gulp": "^4.0.2",
     "gulp-bump": "^3.1.0",
     "gulp-develop-server": "0.5.2",
-    "gulp-flatten": "0.4.0",
-    "gulp-git": "^2.5.2",
-    "gulp-mocha": "^5.0.0",
-    "gulp-shell": "0.6.5",
-    "gulp-uglify": "^3.0.0",
-    "gulp-watch": "5.0.0",
+    "loose-envify": "^1.4.0",
     "mocha": "5.0.5",
     "node-cache": "4.2.0",
     "npm-check-updates": "^2.14.1",
@@ -118,6 +114,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "gulp compile",
     "release-instance-data": "cp ./conf/examples/amigo.yaml.public ./conf/amigo.yaml && npm install && gulp install"
   }
 }
