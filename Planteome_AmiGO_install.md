@@ -22,7 +22,7 @@ These instructions assume a RHEL/Rocky "dnf"/rpm OS. Packages and install instru
 
     > /usr/bin/npm install -g npm@6.10.0
 
-    > npm install -g node@11.15.0
+    > npm install -g node@11.15.0 --unsafe-perm
 
 
 ## Set up directories and files
