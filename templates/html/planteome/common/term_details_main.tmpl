@@ -66,7 +66,7 @@
 	[%      END %]
 	[%      IF  txref_link.dbname == 'PMID' || txref_link.dbname == 'DOI' %]<cite>[% ELSE %]<cite>[% END %][% IF href %]<a title="Go to [% vis %]" href="[% href %]">[% vis %]</a>[% ELSE %][% txref_link.id %][% END %]</cite>[% IF txref_counter < txref_count; txref_counter = txref_counter + 1 %],[% END %]
 																															 [%   END %]
-																															[% ELSE %]
+																															 [% ELSE %]
 																															 [source: unknown]
 																															 [% END %]
 																															 </dd>
@@ -105,6 +105,48 @@
 		      title="See term history.">history for [% TERM_INFO.acc %]</a> at QuickGO</dd>
       [% END %]
 
+      <!-- Taxon constraints. -->
+      <!-- <dt>Taxon info</dt> -->
+      <!-- [% IF TAXON_CONSTRAINTS.size == 0 %] -->
+      <!-- <dd>None</dd> -->
+      <!-- [% ELSE %] -->
+      <!-- [%  FOREACH xtrain = TAXON_CONSTRAINTS %] -->
+      <!-- <dd> -->
+      <!-- 	[% IF xtrain.taxon_rel_acc == 'RO:0002160' %] -->
+      <!-- 	<i>only in taxon</i> -->
+      <!-- 	[% ELSIF xtrain.taxon_rel_acc == 'RO:0002161' %] -->
+      <!-- 	<i>never in taxon</i> -->
+      <!-- 	[% ELSIF xtrain.taxon_rel_acc == 'RO:0002162' %] -->
+      <!-- 	<i>in taxon</i> -->
+      <!-- 	[% ELSE %] -->
+      <!-- 	[% xtrain.taxon_rel_acc %] -->
+      <!-- 	[% END %] -->
+      <!-- 	[%  IF xtrain.taxon_link %] -->
+      <!-- 	<a href="[% xtrain.taxon_link %]">[% xtrain.taxon_name %]</a> -->
+      <!-- 	[%  ELSE %] -->
+      <!-- 	[% xtrain.taxon_name %] -->
+      <!-- 	[%  END %] -->
+      <!-- </dd> -->
+      <!-- [%  END %] -->
+      <!-- [% END %] -->
+
+      <!-- Chemical reaction participants. -->
+      <dt>Chem. react.</dt>
+      [% IF CHEMICAL_REACTION_PARTICIPANTS.size == 0 %]
+      <dd>None</dd>
+      [% ELSE %]
+      [%  FOREACH crp = CHEMICAL_REACTION_PARTICIPANTS %]
+      <dd>
+	<i>has participant</i>
+	[% IF crp.crp_link %]
+	<a href="[% crp.crp_link %]">[% crp.crp_name %]</a>
+	[% ELSE %]
+	[%  crp.crp_name %]
+	[% END %]
+      </dd>
+      [%  END %]
+      [% END %]
+
       <!-- Subsets -->
       <dt>Subset</dt>
       [% IF TERM_INFO.subsets.size != 0 %]
@@ -125,8 +167,9 @@
       [% ELSE %]
       <dd>None</dd>
       [% END %]
-      
-      [% # Note that wikipedia is in here too. %]
+
+      [% # # Note that wikipedia is in here too. %]
+      [% # INCLUDE common/term_details_community.tmpl %]
 
       <!-- JS dynamic links created by manager. -->
       [% IF NOT EXOTIC_P OR AMIGO_FOR_GO_P %]
@@ -179,6 +222,19 @@
       </dd>
 
     </dl>
+
+    [% IF DEFAULT_RELATION %]
+    <div>
+      [% IF DEFAULT_RELATION == 'regulates' %]
+      <a href="/amigo/term/[% TERM_INFO.acc %]?relation=isa_partof" class="btn btn-primary">Exclude "regulates"</a>
+      [% ELSIF DEFAULT_RELATION == 'isa_partof' %]
+      <a href="/amigo/term/[% TERM_INFO.acc %]?relation=regulates" class="btn btn-primary"> Include "regulates"</a>
+      [% ELSE %]
+      No default relation found.
+      [% END %]
+      <br />For more information, please see the <a href="http://geneontology.org/docs/ontology-relations/">ontology relation documentation</a>.
+    </div>
+    [% END %]
 
   </div>
 </div>

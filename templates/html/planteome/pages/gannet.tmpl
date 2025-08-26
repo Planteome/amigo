@@ -39,7 +39,7 @@
 		  class="form-control" 
 		  name="query"
 		  placeholder="Enter your query here"
-		  rows="5">[% gannet_query %]</textarea>
+		  rows="5">[% FILTER html %][% gannet_query %][% END %]</textarea>
       </div>
 
       <h5>Use an example query:</h5>
