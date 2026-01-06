@@ -1283,13 +1283,20 @@ sub generate_template_page_with {
   ## Before we start, make sure that the beta is announced.
   my $is_beta = $self->_atoi($self->{CORE}->amigo_env('AMIGO_BETA'));
   if( defined $is_beta && $is_beta ){
-    $self->add_mq('warning', 'You are using the'.
-		  ' development site of the Planteome ontology browser. See ' .
-		  ' <a title="Go to Planteome main site"'.
-		  ' href="http://browser.planteome.org"'.
-		  ' class="alert-link">'.
-		  ' here</a> for the live browser.');
+	  #	    $self->add_mq('warning', 'You are using the'.
+	  #	  ' development site of the Planteome ontology browser. See ' .
+	  #	  ' <a title="Go to Planteome main site"'.
+	  # 	  ' href="http://browser.planteome.org"'.
+	  #	  ' class="alert-link">'.
+	  #	  ' here</a> for the live browser.');
   }
+  ## Add message and link for survey
+    $self->add_mq('notice', 'Help us improve Planteome!<br><br><small>We are continuously developing'.
+  	' the resource to deliver the best possible service for the community.'.
+  	' Please take a few minutes to fill out our user survey '.
+  	' and help us make Planteome even better.</small>'.
+  	'<br><a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLScQVIcKFxZP8agr-snj3opQCHZy542crllC6buDBaczqNgX0g/viewform?usp=sf_link" class="btn btn-success btn-lg">Take survey</a>'.
+  	'<br> ');
 
   ## Generate the page output.
   my @mbuf = ();
