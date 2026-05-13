@@ -66,7 +66,7 @@ sub mode_xrefs {
   ## Assemble something that can be nicely rendered in order.
   my $all = $self->{CORE}->database_bulk();
   my @unsorted_all = ();
-  foreach my $db (keys $all){
+  foreach my $db (keys %{$all}){
     my $entry = $all->{$db};
     push @unsorted_all, $entry;
   }
